@@ -4,15 +4,18 @@ import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import ReactCrop, { Crop, PixelCrop } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
+import { KNStorage } from '../utils/storage'
 
 export default function Home() {
   const [currentStep, setCurrentStep] = useState<'intro' | 'upload' | 'crop' | 'preview'>('intro')
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
   const [imageId, setImageId] = useState<string | null>(null)
+  const [sessionId, setSessionId] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isDOICompleted, setIsDOICompleted] = useState(false)
   const [crop, setCrop] = useState<Crop>({
     unit: 'px',
     width: 400,
@@ -25,23 +28,45 @@ export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   
-  const isDOIVerified = typeof window !== 'undefined' && 
-    new URLSearchParams(window.location.search).get('doi') === 'true'
-
   useEffect(() => {
-    // Check if returning with DOI verification
+    // Check if there's an existing session
     if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search)
-      const doiParam = urlParams.get('doi')
-      const imageIdParam = urlParams.get('imageId')
-      
-      if (doiParam === 'true' && imageIdParam) {
-        setImageId(imageIdParam)
-        setCapturedImage(`/api/image/${imageIdParam}?doi=true`)
+      const currentSession = KNStorage.getCurrentSession()
+      if (currentSession) {
+        setSessionId(currentSession.imageId)
+        setCapturedImage(currentSession.imageData)
+        setImageId(currentSession.imageId)
         setCurrentStep('preview')
+        
+        // Check if DOI is already completed
+        setIsDOICompleted(KNStorage.isDOICompleted())
       }
     }
+    
+    // Listen for DOI completion messages from popup
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === 'KN_DOI_COMPLETED') {
+        setIsDOICompleted(true)
+      }
+    }
+    
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
   }, [])
+
+  // Polling effect to check DOI status
+  useEffect(() => {
+    if (!sessionId || isDOICompleted) return
+    
+    const checkDOIStatus = () => {
+      if (KNStorage.isDOICompleted()) {
+        setIsDOICompleted(true)
+      }
+    }
+    
+    const interval = setInterval(checkDOIStatus, 2000) // Check every 2 seconds
+    return () => clearInterval(interval)
+  }, [sessionId, isDOICompleted])
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -172,12 +197,22 @@ export default function Home() {
         
         if (coverResponse.ok) {
           const blob = await coverResponse.blob()
-          const url = URL.createObjectURL(blob)
-          const generatedImageId = coverResponse.headers.get('X-Image-ID')
+          const reader = new FileReader()
           
-          setCapturedImage(url)
-          setImageId(generatedImageId)
-          setCurrentStep('preview')
+          reader.onload = () => {
+            const imageDataUrl = reader.result as string
+            
+            // Save as current session
+            const newSessionId = KNStorage.saveCurrentSession(imageDataUrl)
+            
+            setSessionId(newSessionId)
+            setCapturedImage(imageDataUrl)
+            setImageId(newSessionId)
+            setIsDOICompleted(false)
+            setCurrentStep('preview')
+          }
+          
+          reader.readAsDataURL(blob)
         } else {
           throw new Error('Fehler beim Generieren der Titelseite')
         }
@@ -192,10 +227,15 @@ export default function Home() {
   }
 
   const resetApp = () => {
+    // Clean up current session
+    KNStorage.removeCurrentSession()
+    
     setCurrentStep('intro')
     setUploadedImage(null)
     setCapturedImage(null)
     setImageId(null)
+    setSessionId(null)
+    setIsDOICompleted(false)
     setError(null)
     setAcceptedTerms(false)
     setCrop({
@@ -214,16 +254,15 @@ export default function Home() {
   }
 
   const openRegistration = () => {
-    if (imageId) {
-      const registrationUrl = `https://aktion.kn-online.de/angebot/o7bl6?returnUrl=${encodeURIComponent(window.location.origin + '?doi=true&imageId=' + imageId)}`
-      window.open(registrationUrl, '_blank')
-    } else {
-      window.open('https://aktion.kn-online.de/angebot/o7bl6', '_blank')
-    }
+    // Mark registration start time
+    KNStorage.markRegistrationStart()
+    
+    // Open registration page (no parameters needed)
+    window.open('https://aktion.kn-online.de/angebot/o7bl6', '_blank', 'width=800,height=600')
   }
 
   const downloadImage = () => {
-    if (capturedImage && isDOIVerified) {
+    if (capturedImage && isDOICompleted) {
       const link = document.createElement('a')
       link.href = capturedImage
       link.download = `kn-titelseite-${imageId || Date.now()}.jpg`
@@ -234,7 +273,7 @@ export default function Home() {
   }
 
   const shareImage = async () => {
-    if (capturedImage && isDOIVerified && navigator.share) {
+    if (capturedImage && isDOICompleted && navigator.share) {
       try {
         // Convert data URL to blob for sharing
         const response = await fetch(capturedImage)
@@ -397,7 +436,7 @@ export default function Home() {
         {currentStep === 'preview' && capturedImage && (
           <div className="max-w-md mx-auto text-center space-y-6">
             <h2 className="text-2xl font-bold text-kn-dark">
-              {isDOIVerified ? '🎉 Ihre KN Titelseite' : 'Ihre KN Titelseite'}
+              {isDOICompleted ? '🎉 Ihre KN Titelseite' : 'Ihre KN Titelseite'}
             </h2>
 
             <div className="relative bg-white rounded-lg shadow-lg overflow-hidden select-none">
@@ -420,23 +459,23 @@ export default function Home() {
                   className="w-full h-auto pointer-events-none"
                   draggable={false}
                 />
-                {!isDOIVerified && <div className="watermark" />}
+                {!isDOICompleted && <div className="watermark" />}
                 
                 {/* Invisible overlay to prevent saving */}
-                {!isDOIVerified && (
+                {!isDOICompleted && (
                   <div className="absolute inset-0 bg-transparent cursor-default" />
                 )}
               </div>
             </div>
 
-            {!isDOIVerified ? (
+            {!isDOICompleted ? (
               <div className="bg-yellow-50 border border-yellow-400 text-yellow-800 p-4 rounded-lg">
                 <p className="text-sm font-medium mb-2">
                   📧 E-Mail bestätigen für wasserzeichenfreie Version
                 </p>
                 <p className="text-xs">
                   Klicken Sie auf "Wasserzeichen entfernen" um Ihre E-Mail zu bestätigen 
-                  und das Bild ohne Wasserzeichen zu erhalten.
+                  und das Bild ohne Wasserzeichen zu erhalten. Das Bild bleibt 24 Stunden verfügbar.
                 </p>
               </div>
             ) : (
@@ -449,7 +488,7 @@ export default function Home() {
             )}
 
             <div className="flex flex-col space-y-3">
-              {!isDOIVerified ? (
+              {!isDOICompleted ? (
                 <div className="flex space-x-3">
                   <button
                     onClick={resetApp}
