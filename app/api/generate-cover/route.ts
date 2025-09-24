@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     if (imageId) {
       const existingImage = await imageStorage.getImage(imageId)
       if (existingImage) {
-        return new NextResponse(existingImage, {
+        return new NextResponse(new Uint8Array(existingImage), {
           headers: {
             'Content-Type': 'image/jpeg',
             'Content-Length': existingImage.length.toString(),
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     // Save the generated image
     const storedImage = await imageStorage.saveImage(buffer, template.id)
     
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': 'image/jpeg',
         'Content-Length': buffer.length.toString(),

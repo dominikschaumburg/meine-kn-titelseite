@@ -32,7 +32,7 @@ export async function GET(
       headers['X-Watermark'] = 'removed'
     }
     
-    return new NextResponse(imageBuffer, { headers })
+    return new NextResponse(new Uint8Array(imageBuffer), { headers })
     
   } catch (error) {
     console.error('Image retrieval error:', error)
