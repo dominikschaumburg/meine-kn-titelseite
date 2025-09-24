@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'DINNext';
+  src: url('../assets/fonts/DINNextLTW05-Regular.woff2') format('woff2'),
+       url('../assets/fonts/DINNextLTW05-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DINNext';
+  src: url('../assets/fonts/DINNextLTW05-Medium.woff2') format('woff2'),
+       url('../assets/fonts/DINNextLTW05-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DINNext';
+  src: url('../assets/fonts/DINNextLTW05-Bold.woff2') format('woff2'),
+       url('../assets/fonts/DINNextLTW05-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  font-family: 'DINNext', sans-serif;
+  background-color: #eef3f5;
+  color: #2a3845;
+}
+
+.watermark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('/api/watermark') no-repeat center center;
+  background-size: 50%;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 10;
+}
