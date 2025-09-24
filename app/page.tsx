@@ -11,6 +11,8 @@ export default function Home() {
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [cameraError, setCameraError] = useState<string | null>(null)
+  const [isLandscape, setIsLandscape] = useState(false)
+  const [deviceOrientation, setDeviceOrientation] = useState<string>('unknown')
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   
@@ -28,6 +30,63 @@ export default function Home() {
         setImageId(imageIdParam)
         setCapturedImage(`/api/image/${imageIdParam}?doi=true`)
         setCurrentStep('preview')
+      }
+    }
+  }, [])
+
+  // Device Orientation tracking
+  useEffect(() => {
+    const updateOrientation = () => {
+      if (typeof window !== 'undefined') {
+        const orientation = window.screen?.orientation?.type || 
+          (window.orientation !== undefined ? 
+            (Math.abs(window.orientation) === 90 ? 'landscape' : 'portrait') : 
+            'unknown')
+        
+        const screenWidth = window.screen?.width || window.innerWidth
+        const screenHeight = window.screen?.height || window.innerHeight
+        const isCurrentlyLandscape = screenWidth > screenHeight
+        
+        setIsLandscape(isCurrentlyLandscape)
+        setDeviceOrientation(orientation.toString())
+        
+        console.log('Orientation update:', { 
+          orientation, 
+          isCurrentlyLandscape, 
+          screenWidth, 
+          screenHeight,
+          windowOrientation: window.orientation 
+        })
+      }
+    }
+
+    // Initial check
+    updateOrientation()
+
+    // Listen for orientation changes
+    const handleOrientationChange = () => {
+      // Small delay to allow screen dimensions to update
+      setTimeout(updateOrientation, 100)
+    }
+
+    const handleResize = () => {
+      updateOrientation()
+    }
+
+    // Event listeners
+    window.addEventListener('orientationchange', handleOrientationChange)
+    window.addEventListener('resize', handleResize)
+    
+    // Screen orientation API (modern browsers)
+    if (window.screen?.orientation) {
+      window.screen.orientation.addEventListener('change', updateOrientation)
+    }
+
+    return () => {
+      window.removeEventListener('orientationchange', handleOrientationChange)
+      window.removeEventListener('resize', handleResize)
+      if (window.screen?.orientation) {
+        window.screen.orientation.removeEventListener('change', updateOrientation)
       }
     }
   }, [])
@@ -65,6 +124,11 @@ export default function Home() {
             const { videoWidth, videoHeight } = videoRef.current
             console.log(`Video dimensions: ${videoWidth}x${videoHeight}`)
             
+            // Force video to play
+            videoRef.current.play().catch((error) => {
+              console.error('Video play failed:', error)
+            })
+            
             if (videoHeight > videoWidth) {
               setCameraError('📱 Bitte drehen Sie Ihr Gerät ins Querformat für bessere Ergebnisse!')
             } else {
@@ -75,7 +139,20 @@ export default function Home() {
         
         videoRef.current.oncanplay = () => {
           console.log('Video can play')
-          videoRef.current?.play()
+          if (videoRef.current) {
+            videoRef.current.play().catch((error) => {
+              console.error('Video play failed:', error)
+            })
+          }
+        }
+        
+        // Additional event listeners for debugging
+        videoRef.current.onerror = (error) => {
+          console.error('Video error:', error)
+        }
+        
+        videoRef.current.onloadstart = () => {
+          console.log('Video load started')
         }
       }
       setCurrentStep('camera')
@@ -312,10 +389,56 @@ export default function Home() {
               📸 Foto aufnehmen
             </h2>
             
-            <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg">
-              <p className="font-medium mb-2">📱 Wichtige Hinweise:</p>
-              <ul className="text-sm space-y-1 text-left">
-                <li>• Halte dein Smartphone/Gerät <strong>horizontal (Querformat)</strong></li>
+            {/* Orientation Status */}
+            <div className={`p-4 rounded-lg border transition-all duration-300 ${
+              isLandscape 
+                ? 'bg-green-50 border-green-200 text-green-800' 
+                : 'bg-red-50 border-red-200 text-red-800'
+            }`}>
+              <div className="flex items-center justify-center space-x-2">
+                <div className={`transition-transform duration-500 ${isLandscape ? '' : 'animate-bounce'}`}>
+                  {isLandscape ? '✅' : '📱'}
+                </div>
+                <p className="font-medium">
+                  {isLandscape 
+                    ? 'Perfekt! Gerät ist im Querformat' 
+                    : 'Bitte drehen Sie Ihr Gerät ins Querformat'}
+                </p>
+                <div className={`transition-transform duration-500 ${isLandscape ? '' : 'animate-spin'}`}>
+                  🔄
+                </div>
+              </div>
+              <p className="text-xs mt-1 text-center">
+                Orientierung: {deviceOrientation} | Landscape: {isLandscape ? 'Ja' : 'Nein'}
+              </p>
+            </div>
+
+            {/* Animated Phone Rotation Guide */}
+            {!isLandscape && (
+              <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-lg">
+                <div className="flex items-center justify-center space-x-4">
+                  <div className="flex flex-col items-center">
+                    <div className="w-8 h-12 bg-gray-800 rounded-md border-2 border-gray-600 mb-2 transform transition-transform duration-1000 animate-pulse">
+                      <div className="w-1 h-1 bg-white rounded-full mx-auto mt-1"></div>
+                    </div>
+                    <span className="text-xs">Portrait</span>
+                  </div>
+                  <div className="animate-bounce text-2xl">→</div>
+                  <div className="flex flex-col items-center">
+                    <div className="w-12 h-8 bg-gray-800 rounded-md border-2 border-gray-600 mb-2 transform transition-transform duration-1000">
+                      <div className="w-1 h-1 bg-white rounded-full mx-auto mt-1"></div>
+                    </div>
+                    <span className="text-xs">Querformat</span>
+                  </div>
+                </div>
+                <p className="text-center text-sm mt-2 font-medium">
+                  🔄 Drehen Sie Ihr Gerät für optimale Ergebnisse
+                </p>
+              </div>
+            )}
+
+            <div className="bg-blue-50 border border-blue-200 text-blue-800 p-3 rounded-lg">
+              <ul className="text-sm space-y-1">
                 <li>• Positioniere dich zentral im Kamerabild</li>
                 <li>• Sorge für gute Beleuchtung</li>
                 <li>• Das Foto wird automatisch zugeschnitten</li>
@@ -374,10 +497,18 @@ export default function Home() {
               </button>
               <button
                 onClick={capturePhoto}
-                disabled={isProcessing || !!cameraError}
-                className="flex-1 bg-kn-green text-white py-3 px-6 rounded-lg font-medium disabled:opacity-50 hover:bg-kn-green/90 transition-colors"
+                disabled={isProcessing || !!cameraError || !isLandscape}
+                className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all duration-300 ${
+                  isLandscape && !isProcessing && !cameraError
+                    ? 'bg-kn-green text-white hover:bg-kn-green/90 cursor-pointer'
+                    : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                }`}
               >
-                {isProcessing ? '⏳ Verarbeite...' : '📸 Foto aufnehmen'}
+                {isProcessing 
+                  ? '⏳ Verarbeite...' 
+                  : !isLandscape 
+                  ? '🔄 Querformat erforderlich' 
+                  : '📸 Foto aufnehmen'}
               </button>
             </div>
             
