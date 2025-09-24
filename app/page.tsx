@@ -34,57 +34,136 @@ export default function Home() {
 
   const startCamera = async () => {
     setCameraError(null)
+    setError(null)
+    
     try {
+      // Check if camera is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Camera not supported')
+      }
+
       // Try to get camera with landscape preference
       const constraints = {
         video: { 
           facingMode: 'user',
           width: { ideal: 1920, min: 1280 },
           height: { ideal: 1080, min: 720 }
-        }
+        },
+        audio: false
       }
       
+      console.log('Requesting camera access...')
       const stream = await navigator.mediaDevices.getUserMedia(constraints)
+      console.log('Camera access granted')
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream
+        
         videoRef.current.onloadedmetadata = () => {
-          // Force landscape orientation hint
+          console.log('Video metadata loaded')
           if (videoRef.current) {
             const { videoWidth, videoHeight } = videoRef.current
+            console.log(`Video dimensions: ${videoWidth}x${videoHeight}`)
+            
             if (videoHeight > videoWidth) {
-              setCameraError('Bitte drehen Sie Ihr Gerät ins Querformat für bessere Ergebnisse')
+              setCameraError('📱 Bitte drehen Sie Ihr Gerät ins Querformat für bessere Ergebnisse!')
+            } else {
+              setCameraError(null)
             }
           }
+        }
+        
+        videoRef.current.oncanplay = () => {
+          console.log('Video can play')
+          videoRef.current?.play()
         }
       }
       setCurrentStep('camera')
     } catch (err) {
       console.error('Camera error:', err)
-      setError('Kamera konnte nicht gestartet werden. Bitte überprüfen Sie die Berechtigungen und stellen Sie sicher, dass keine andere App die Kamera verwendet.')
+      if (err.name === 'NotAllowedError') {
+        setError('Kamera-Zugriff wurde verweigert. Bitte erlauben Sie den Kamera-Zugriff und laden Sie die Seite neu.')
+      } else if (err.name === 'NotFoundError') {
+        setError('Keine Kamera gefunden. Stellen Sie sicher, dass Ihr Gerät über eine Kamera verfügt.')
+      } else if (err.name === 'NotReadableError') {
+        setError('Kamera ist bereits in Verwendung. Schließen Sie andere Apps, die die Kamera verwenden könnten.')
+      } else {
+        setError('Kamera konnte nicht gestartet werden. Überprüfen Sie die Kamera-Berechtigungen.')
+      }
     }
   }
 
   const capturePhoto = async () => {
-    if (!videoRef.current || !canvasRef.current) return
+    if (!videoRef.current || !canvasRef.current) {
+      setError('Kamera oder Canvas nicht verfügbar')
+      return
+    }
     
     const canvas = canvasRef.current
     const video = videoRef.current
     const ctx = canvas.getContext('2d')
     
+    if (!ctx) {
+      setError('Canvas-Kontext nicht verfügbar')
+      return
+    }
+
+    // Check if video is actually playing
+    if (video.readyState < 2) {
+      setError('Video ist noch nicht bereit. Bitte warten Sie einen Moment.')
+      return
+    }
+
+    // Check orientation - force landscape
+    const { videoWidth, videoHeight } = video
+    console.log(`Capturing from video: ${videoWidth}x${videoHeight}`)
+    
+    if (videoHeight > videoWidth) {
+      setError('❌ Bitte drehen Sie Ihr Gerät ins Querformat und versuchen Sie es erneut!')
+      return
+    }
+    
+    // Set canvas to landscape (16:9 aspect ratio)
     canvas.width = 1920
     canvas.height = 1080
     
-    ctx?.drawImage(video, 0, 0, 1920, 1080)
+    // Clear canvas and draw video frame
+    ctx.fillStyle = '#000000'
+    ctx.fillRect(0, 0, 1920, 1080)
+    
+    // Draw video maintaining aspect ratio
+    const videoAspect = videoWidth / videoHeight
+    const canvasAspect = 1920 / 1080
+    
+    let drawWidth = 1920
+    let drawHeight = 1080
+    let drawX = 0
+    let drawY = 0
+    
+    if (videoAspect > canvasAspect) {
+      // Video is wider, fit to height
+      drawHeight = 1080
+      drawWidth = drawHeight * videoAspect
+      drawX = (1920 - drawWidth) / 2
+    } else {
+      // Video is taller, fit to width
+      drawWidth = 1920
+      drawHeight = drawWidth / videoAspect
+      drawY = (1080 - drawHeight) / 2
+    }
+    
+    ctx.drawImage(video, drawX, drawY, drawWidth, drawHeight)
     
     const dataUrl = canvas.toDataURL('image/jpeg', 0.9)
-    setCapturedImage(dataUrl)
+    console.log('Photo captured, data URL length:', dataUrl.length)
     
     // Stop camera
     const stream = video.srcObject as MediaStream
     stream?.getTracks().forEach(track => track.stop())
     
     setIsProcessing(true)
+    setError(null)
+    setCameraError(null)
     
     try {
       // Send to moderation API
@@ -227,22 +306,28 @@ export default function Home() {
 
         {/* Camera Step */}
         {currentStep === 'camera' && (
-          <div className="max-w-2xl mx-auto text-center space-y-6">
+          <div className="max-w-2xl mx-auto text-center space-y-6 camera-step">
             <h2 className="text-2xl font-bold text-kn-dark">
-              Foto aufnehmen
+              📸 Foto aufnehmen
             </h2>
             
-            <p className="text-kn-dark/80">
-              Halte dein Smartphone horizontal und positioniere dich im Bild
-            </p>
+            <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg">
+              <p className="font-medium mb-2">📱 Wichtige Hinweise:</p>
+              <ul className="text-sm space-y-1 text-left">
+                <li>• Halte dein Smartphone/Gerät <strong>horizontal (Querformat)</strong></li>
+                <li>• Positioniere dich zentral im Kamerabild</li>
+                <li>• Sorge für gute Beleuchtung</li>
+                <li>• Das Foto wird automatisch zugeschnitten</li>
+              </ul>
+            </div>
 
             {cameraError && (
-              <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 p-3 rounded-lg text-sm">
+              <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 p-3 rounded-lg text-sm font-medium">
                 {cameraError}
               </div>
             )}
 
-            <div className="relative bg-black rounded-lg overflow-hidden" style={{ aspectRatio: '16/9' }}>
+            <div className="relative bg-black rounded-lg overflow-hidden shadow-xl" style={{ aspectRatio: '16/9' }}>
               <video
                 ref={videoRef}
                 autoPlay
@@ -252,11 +337,31 @@ export default function Home() {
               />
               
               {/* Camera guide overlay */}
-              <div className="absolute inset-4 border-2 border-white/50 rounded-lg pointer-events-none">
-                <div className="absolute top-2 left-2 text-white text-sm bg-black/50 px-2 py-1 rounded">
-                  Positioniere dich hier
+              <div className="absolute inset-4 border-2 border-white/70 rounded-lg pointer-events-none">
+                <div className="absolute top-2 left-2 text-white text-sm bg-black/70 px-2 py-1 rounded">
+                  📍 Positioniere dich hier
+                </div>
+                
+                {/* Orientation indicator */}
+                <div className="absolute top-2 right-2 text-white text-xs bg-black/70 px-2 py-1 rounded">
+                  📏 16:9 Querformat
+                </div>
+                
+                {/* Center guide */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="w-32 h-32 border-2 border-white/30 rounded-full"></div>
                 </div>
               </div>
+              
+              {/* Loading overlay */}
+              {!videoRef.current?.srcObject && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                  <div className="text-white text-center">
+                    <div className="animate-spin w-8 h-8 border-2 border-white border-t-transparent rounded-full mx-auto mb-2"></div>
+                    <p>Kamera wird geladen...</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex space-x-4">
@@ -264,16 +369,20 @@ export default function Home() {
                 onClick={resetApp}
                 className="flex-1 bg-gray-500 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-600 transition-colors"
               >
-                Abbrechen
+                ✖️ Abbrechen
               </button>
               <button
                 onClick={capturePhoto}
-                disabled={isProcessing}
+                disabled={isProcessing || !!cameraError}
                 className="flex-1 bg-kn-green text-white py-3 px-6 rounded-lg font-medium disabled:opacity-50 hover:bg-kn-green/90 transition-colors"
               >
-                {isProcessing ? 'Verarbeite...' : 'Foto aufnehmen'}
+                {isProcessing ? '⏳ Verarbeite...' : '📸 Foto aufnehmen'}
               </button>
             </div>
+            
+            <p className="text-xs text-gray-600">
+              Das aufgenommene Foto wird automatisch auf Inhalte überprüft und verarbeitet.
+            </p>
           </div>
         )}
 

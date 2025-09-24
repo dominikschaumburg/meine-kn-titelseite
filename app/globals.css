@@ -47,3 +47,39 @@ body {
   pointer-events: none;
   z-index: 10;
 }
+
+/* Mobile orientation hints */
+@media screen and (max-width: 768px) {
+  .camera-step {
+    position: relative;
+  }
+  
+  /* Portrait orientation warning */
+  @media (orientation: portrait) {
+    .camera-step::before {
+      content: "🔄 Für beste Ergebnisse drehen Sie Ihr Gerät ins Querformat";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #f59e0b;
+      color: white;
+      text-align: center;
+      padding: 8px;
+      font-size: 14px;
+      z-index: 1000;
+      font-weight: 600;
+    }
+  }
+}
+
+/* Force landscape video constraints */
+video {
+  object-fit: cover;
+  transform: scaleX(-1); /* Mirror effect for selfie */
+}
+
+/* Disable auto-zoom on iOS */
+input, select, textarea, video {
+  font-size: 16px;
+}
