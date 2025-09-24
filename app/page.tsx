@@ -81,11 +81,12 @@ export default function Home() {
       setCurrentStep('camera')
     } catch (err) {
       console.error('Camera error:', err)
-      if (err.name === 'NotAllowedError') {
+      const error = err as any
+      if (error?.name === 'NotAllowedError') {
         setError('Kamera-Zugriff wurde verweigert. Bitte erlauben Sie den Kamera-Zugriff und laden Sie die Seite neu.')
-      } else if (err.name === 'NotFoundError') {
+      } else if (error?.name === 'NotFoundError') {
         setError('Keine Kamera gefunden. Stellen Sie sicher, dass Ihr Gerät über eine Kamera verfügt.')
-      } else if (err.name === 'NotReadableError') {
+      } else if (error?.name === 'NotReadableError') {
         setError('Kamera ist bereits in Verwendung. Schließen Sie andere Apps, die die Kamera verwenden könnten.')
       } else {
         setError('Kamera konnte nicht gestartet werden. Überprüfen Sie die Kamera-Berechtigungen.')
