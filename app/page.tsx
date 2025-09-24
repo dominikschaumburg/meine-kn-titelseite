@@ -303,23 +303,58 @@ export default function Home() {
 
   const openRegistration = () => {
     if (imageId) {
-      const registrationUrl = `https://registration-landing-page.com?returnUrl=${encodeURIComponent(window.location.origin + '?doi=true&imageId=' + imageId)}`
+      const registrationUrl = `https://aktion.kn-online.de/angebot/o7bl6?returnUrl=${encodeURIComponent(window.location.origin + '?doi=true&imageId=' + imageId)}`
       window.open(registrationUrl, '_blank')
     } else {
-      window.open('https://registration-landing-page.com', '_blank')
+      window.open('https://aktion.kn-online.de/angebot/o7bl6', '_blank')
+    }
+  }
+
+  const downloadImage = () => {
+    if (capturedImage && isDOIVerified) {
+      const link = document.createElement('a')
+      link.href = capturedImage
+      link.download = `kn-titelseite-${imageId || Date.now()}.jpg`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
+  }
+
+  const shareImage = async () => {
+    if (capturedImage && isDOIVerified && navigator.share) {
+      try {
+        // Convert data URL to blob for sharing
+        const response = await fetch(capturedImage)
+        const blob = await response.blob()
+        const file = new File([blob], `kn-titelseite-${imageId || Date.now()}.jpg`, { type: 'image/jpeg' })
+
+        await navigator.share({
+          title: 'Meine KN Titelseite',
+          text: 'Schau dir meine personalisierte KN Titelseite an!',
+          files: [file]
+        })
+      } catch (error) {
+        console.error('Sharing failed:', error)
+        // Fallback: copy link
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(window.location.href)
+          alert('Link wurde in die Zwischenablage kopiert!')
+        }
+      }
     }
   }
 
   return (
     <div className="min-h-screen bg-kn-light flex flex-col">
       {/* Header */}
-      <header className="flex justify-center py-6 px-4">
-        <div className="w-48 h-auto">
+      <header className="py-6 px-4">
+        <div className="w-full max-w-sm mx-auto md:max-w-xs">
           <Image 
             src="/assets/logos/KN_Schriftzug_Logo_Digital_Farbig.svg"
             alt="KN Logo"
-            width={192}
-            height={60}
+            width={320}
+            height={80}
             className="w-full h-auto"
           />
         </div>
@@ -389,61 +424,11 @@ export default function Home() {
               📸 Foto aufnehmen
             </h2>
             
-            {/* Orientation Status */}
-            <div className={`p-4 rounded-lg border transition-all duration-300 ${
-              isLandscape 
-                ? 'bg-green-50 border-green-200 text-green-800' 
-                : 'bg-red-50 border-red-200 text-red-800'
-            }`}>
-              <div className="flex items-center justify-center space-x-2">
-                <div className={`transition-transform duration-500 ${isLandscape ? '' : 'animate-bounce'}`}>
-                  {isLandscape ? '✅' : '📱'}
-                </div>
-                <p className="font-medium">
-                  {isLandscape 
-                    ? 'Perfekt! Gerät ist im Querformat' 
-                    : 'Bitte drehen Sie Ihr Gerät ins Querformat'}
-                </p>
-                <div className={`transition-transform duration-500 ${isLandscape ? '' : 'animate-spin'}`}>
-                  🔄
-                </div>
-              </div>
-              <p className="text-xs mt-1 text-center">
-                Orientierung: {deviceOrientation} | Landscape: {isLandscape ? 'Ja' : 'Nein'}
-              </p>
-            </div>
-
-            {/* Animated Phone Rotation Guide */}
             {!isLandscape && (
-              <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-lg">
-                <div className="flex items-center justify-center space-x-4">
-                  <div className="flex flex-col items-center">
-                    <div className="w-8 h-12 bg-gray-800 rounded-md border-2 border-gray-600 mb-2 transform transition-transform duration-1000 animate-pulse">
-                      <div className="w-1 h-1 bg-white rounded-full mx-auto mt-1"></div>
-                    </div>
-                    <span className="text-xs">Portrait</span>
-                  </div>
-                  <div className="animate-bounce text-2xl">→</div>
-                  <div className="flex flex-col items-center">
-                    <div className="w-12 h-8 bg-gray-800 rounded-md border-2 border-gray-600 mb-2 transform transition-transform duration-1000">
-                      <div className="w-1 h-1 bg-white rounded-full mx-auto mt-1"></div>
-                    </div>
-                    <span className="text-xs">Querformat</span>
-                  </div>
-                </div>
-                <p className="text-center text-sm mt-2 font-medium">
-                  🔄 Drehen Sie Ihr Gerät für optimale Ergebnisse
-                </p>
+              <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 p-3 rounded-lg text-center">
+                <p className="font-medium">📱🔄 Bitte Gerät ins Querformat drehen</p>
               </div>
             )}
-
-            <div className="bg-blue-50 border border-blue-200 text-blue-800 p-3 rounded-lg">
-              <ul className="text-sm space-y-1">
-                <li>• Positioniere dich zentral im Kamerabild</li>
-                <li>• Sorge für gute Beleuchtung</li>
-                <li>• Das Foto wird automatisch zugeschnitten</li>
-              </ul>
-            </div>
 
             {cameraError && (
               <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 p-3 rounded-lg text-sm font-medium">
@@ -477,9 +462,9 @@ export default function Home() {
                 </div>
               </div>
               
-              {/* Loading overlay */}
-              {!videoRef.current?.srcObject && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+              {/* Loading overlay - only show when camera is actually starting */}
+              {currentStep === 'camera' && !videoRef.current && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/80">
                   <div className="text-white text-center">
                     <div className="animate-spin w-8 h-8 border-2 border-white border-t-transparent rounded-full mx-auto mb-2"></div>
                     <p>Kamera wird geladen...</p>
@@ -522,43 +507,96 @@ export default function Home() {
         {currentStep === 'preview' && capturedImage && (
           <div className="max-w-md mx-auto text-center space-y-6">
             <h2 className="text-2xl font-bold text-kn-dark">
-              Deine KN Titelseite
+              {isDOIVerified ? '🎉 Ihre KN Titelseite' : 'Ihre KN Titelseite'}
             </h2>
 
-            <div className="relative bg-white rounded-lg shadow-lg overflow-hidden">
-              <Image
-                src={capturedImage}
-                alt="Generierte Titelseite"
-                width={400}
-                height={400}
-                className="w-full h-auto"
-              />
-              {!isDOIVerified && <div className="watermark" />}
+            <div className="relative bg-white rounded-lg shadow-lg overflow-hidden select-none">
+              {/* Prevent right-click context menu on image */}
+              <div 
+                className="relative"
+                onContextMenu={(e) => e.preventDefault()}
+                style={{ 
+                  WebkitUserSelect: 'none',
+                  MozUserSelect: 'none',
+                  msUserSelect: 'none',
+                  userSelect: 'none'
+                }}
+              >
+                <Image
+                  src={capturedImage}
+                  alt="Generierte Titelseite"
+                  width={400}
+                  height={400}
+                  className="w-full h-auto pointer-events-none"
+                  draggable={false}
+                />
+                {!isDOIVerified && <div className="watermark" />}
+                
+                {/* Invisible overlay to prevent saving */}
+                {!isDOIVerified && (
+                  <div className="absolute inset-0 bg-transparent cursor-default" />
+                )}
+              </div>
             </div>
 
-            {!isDOIVerified && (
-              <div className="bg-kn-blue/10 border border-kn-blue text-kn-blue p-4 rounded-lg">
-                <p className="text-sm">
-                  Um die Titelseite ohne Wasserzeichen zu erhalten, 
-                  registrieren Sie sich über den Button unten.
+            {!isDOIVerified ? (
+              <div className="bg-yellow-50 border border-yellow-400 text-yellow-800 p-4 rounded-lg">
+                <p className="text-sm font-medium mb-2">
+                  📧 E-Mail bestätigen für wasserzeichenfreie Version
+                </p>
+                <p className="text-xs">
+                  Klicken Sie auf "Wasserzeichen entfernen" um Ihre E-Mail zu bestätigen 
+                  und das Bild ohne Wasserzeichen zu erhalten.
+                </p>
+              </div>
+            ) : (
+              <div className="bg-green-50 border border-green-400 text-green-800 p-4 rounded-lg">
+                <p className="text-sm font-medium">
+                  ✅ Wasserzeichen erfolgreich entfernt! 
+                  Sie können das Bild jetzt herunterladen oder teilen.
                 </p>
               </div>
             )}
 
-            <div className="flex space-x-4">
-              <button
-                onClick={resetApp}
-                className="flex-1 bg-gray-500 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-600 transition-colors"
-              >
-                Neues Foto
-              </button>
-              {!isDOIVerified && (
-                <button
-                  onClick={openRegistration}
-                  className="flex-1 bg-kn-blue text-white py-3 px-6 rounded-lg font-medium hover:bg-kn-blue/90 transition-colors"
-                >
-                  Registrieren
-                </button>
+            <div className="flex flex-col space-y-3">
+              {!isDOIVerified ? (
+                <div className="flex space-x-3">
+                  <button
+                    onClick={resetApp}
+                    className="flex-1 bg-gray-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-600 transition-colors text-sm"
+                  >
+                    🔄 Neues Foto
+                  </button>
+                  <button
+                    onClick={openRegistration}
+                    className="flex-2 bg-kn-blue text-white py-3 px-4 rounded-lg font-medium hover:bg-kn-blue/90 transition-colors text-sm"
+                  >
+                    ✨ Wasserzeichen entfernen
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={downloadImage}
+                      className="flex-1 bg-kn-green text-white py-3 px-4 rounded-lg font-medium hover:bg-kn-green/90 transition-colors text-sm"
+                    >
+                      📥 Download
+                    </button>
+                    <button
+                      onClick={shareImage}
+                      className="flex-1 bg-kn-blue text-white py-3 px-4 rounded-lg font-medium hover:bg-kn-blue/90 transition-colors text-sm"
+                    >
+                      📤 Teilen
+                    </button>
+                  </div>
+                  <button
+                    onClick={resetApp}
+                    className="w-full bg-gray-400 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-500 transition-colors text-sm"
+                  >
+                    🔄 Neues Foto erstellen
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -566,6 +604,17 @@ export default function Home() {
       </main>
 
       <canvas ref={canvasRef} className="hidden" />
+      
+      {/* Footer */}
+      <footer className="bg-kn-dark text-white py-4 px-4 text-center">
+        <div className="text-xs space-x-4">
+          <a href="/agb" className="hover:text-kn-blue transition-colors">AGB</a>
+          <span>|</span>
+          <a href="/datenschutz" className="hover:text-kn-blue transition-colors">Datenschutz</a>
+          <span>|</span>
+          <a href="/impressum" className="hover:text-kn-blue transition-colors">Impressum</a>
+        </div>
+      </footer>
     </div>
   )
 }
