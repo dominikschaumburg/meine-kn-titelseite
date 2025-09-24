@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No image provided' }, { status: 400 })
     }
 
+    // Extract base64 data and format properly for OpenAI
     const base64Data = image.replace(/^data:image\/[a-z]+;base64,/, '')
     
     const response = await openai.moderations.create({
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
         {
           type: 'image_url',
           image_url: {
-            url: image
+            url: `data:image/jpeg;base64,${base64Data}`
           }
         }
       ]

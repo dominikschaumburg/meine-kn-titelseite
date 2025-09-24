@@ -2,19 +2,28 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
+import ReactCrop, { Crop, PixelCrop } from 'react-image-crop'
+import 'react-image-crop/dist/ReactCrop.css'
 
 export default function Home() {
-  const [currentStep, setCurrentStep] = useState<'intro' | 'camera' | 'preview'>('intro')
+  const [currentStep, setCurrentStep] = useState<'intro' | 'upload' | 'crop' | 'preview'>('intro')
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
   const [imageId, setImageId] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [cameraError, setCameraError] = useState<string | null>(null)
-  const [isLandscape, setIsLandscape] = useState(false)
-  const [deviceOrientation, setDeviceOrientation] = useState<string>('unknown')
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const [crop, setCrop] = useState<Crop>({
+    unit: 'px',
+    width: 400,
+    height: 250,
+    x: 0,
+    y: 0
+  })
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop>()
+  const imgRef = useRef<HTMLImageElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   
   const isDOIVerified = typeof window !== 'undefined' && 
     new URLSearchParams(window.location.search).get('doi') === 'true'
@@ -34,151 +43,73 @@ export default function Home() {
     }
   }, [])
 
-  // Device Orientation tracking
-  useEffect(() => {
-    const updateOrientation = () => {
-      if (typeof window !== 'undefined') {
-        const orientation = window.screen?.orientation?.type || 
-          (window.orientation !== undefined ? 
-            (Math.abs(window.orientation) === 90 ? 'landscape' : 'portrait') : 
-            'unknown')
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      setError('Bitte wählen Sie eine Bilddatei aus.')
+      return
+    }
+
+    // Check file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setError('Die Datei ist zu groß. Maximal 10MB sind erlaubt.')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const result = e.target?.result
+      if (typeof result === 'string') {
+        setUploadedImage(result)
+        setError(null)
+        setCurrentStep('crop')
         
-        const screenWidth = window.screen?.width || window.innerWidth
-        const screenHeight = window.screen?.height || window.innerHeight
-        const isCurrentlyLandscape = screenWidth > screenHeight
-        
-        setIsLandscape(isCurrentlyLandscape)
-        setDeviceOrientation(orientation.toString())
-        
-        console.log('Orientation update:', { 
-          orientation, 
-          isCurrentlyLandscape, 
-          screenWidth, 
-          screenHeight,
-          windowOrientation: window.orientation 
-        })
-      }
-    }
-
-    // Initial check
-    updateOrientation()
-
-    // Listen for orientation changes
-    const handleOrientationChange = () => {
-      // Small delay to allow screen dimensions to update
-      setTimeout(updateOrientation, 100)
-    }
-
-    const handleResize = () => {
-      updateOrientation()
-    }
-
-    // Event listeners
-    window.addEventListener('orientationchange', handleOrientationChange)
-    window.addEventListener('resize', handleResize)
-    
-    // Screen orientation API (modern browsers)
-    if (window.screen?.orientation) {
-      window.screen.orientation.addEventListener('change', updateOrientation)
-    }
-
-    return () => {
-      window.removeEventListener('orientationchange', handleOrientationChange)
-      window.removeEventListener('resize', handleResize)
-      if (window.screen?.orientation) {
-        window.screen.orientation.removeEventListener('change', updateOrientation)
-      }
-    }
-  }, [])
-
-  const startCamera = async () => {
-    setCameraError(null)
-    setError(null)
-    
-    try {
-      // Check if camera is available
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('Camera not supported')
-      }
-
-      // Try to get camera with landscape preference
-      const constraints = {
-        video: { 
-          facingMode: 'user',
-          width: { ideal: 1920, min: 1280 },
-          height: { ideal: 1080, min: 720 }
-        },
-        audio: false
-      }
-      
-      console.log('Requesting camera access...')
-      const stream = await navigator.mediaDevices.getUserMedia(constraints)
-      console.log('Camera access granted')
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        
-        videoRef.current.onloadedmetadata = () => {
-          console.log('Video metadata loaded')
-          if (videoRef.current) {
-            const { videoWidth, videoHeight } = videoRef.current
-            console.log(`Video dimensions: ${videoWidth}x${videoHeight}`)
+        // Initialize crop to landscape aspect ratio
+        setTimeout(() => {
+          if (imgRef.current) {
+            const { naturalWidth, naturalHeight } = imgRef.current
+            const targetAspect = 16 / 9 // Landscape aspect ratio
             
-            // Force video to play
-            videoRef.current.play().catch((error) => {
-              console.error('Video play failed:', error)
-            })
-            
-            if (videoHeight > videoWidth) {
-              setCameraError('📱 Bitte drehen Sie Ihr Gerät ins Querformat für bessere Ergebnisse!')
+            let cropWidth, cropHeight
+            if (naturalWidth / naturalHeight > targetAspect) {
+              // Image is wider than target, crop horizontally
+              cropHeight = naturalHeight * 0.8
+              cropWidth = cropHeight * targetAspect
             } else {
-              setCameraError(null)
+              // Image is taller than target, crop vertically
+              cropWidth = naturalWidth * 0.8
+              cropHeight = cropWidth / targetAspect
             }
-          }
-        }
-        
-        videoRef.current.oncanplay = () => {
-          console.log('Video can play')
-          if (videoRef.current) {
-            videoRef.current.play().catch((error) => {
-              console.error('Video play failed:', error)
+            
+            setCrop({
+              unit: 'px',
+              width: cropWidth,
+              height: cropHeight,
+              x: (naturalWidth - cropWidth) / 2,
+              y: (naturalHeight - cropHeight) / 2
             })
           }
-        }
-        
-        // Additional event listeners for debugging
-        videoRef.current.onerror = (error) => {
-          console.error('Video error:', error)
-        }
-        
-        videoRef.current.onloadstart = () => {
-          console.log('Video load started')
-        }
-      }
-      setCurrentStep('camera')
-    } catch (err) {
-      console.error('Camera error:', err)
-      const error = err as any
-      if (error?.name === 'NotAllowedError') {
-        setError('Kamera-Zugriff wurde verweigert. Bitte erlauben Sie den Kamera-Zugriff und laden Sie die Seite neu.')
-      } else if (error?.name === 'NotFoundError') {
-        setError('Keine Kamera gefunden. Stellen Sie sicher, dass Ihr Gerät über eine Kamera verfügt.')
-      } else if (error?.name === 'NotReadableError') {
-        setError('Kamera ist bereits in Verwendung. Schließen Sie andere Apps, die die Kamera verwenden könnten.')
-      } else {
-        setError('Kamera konnte nicht gestartet werden. Überprüfen Sie die Kamera-Berechtigungen.')
+        }, 100)
       }
     }
+    reader.readAsDataURL(file)
   }
 
-  const capturePhoto = async () => {
-    if (!videoRef.current || !canvasRef.current) {
-      setError('Kamera oder Canvas nicht verfügbar')
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click()
+  }
+
+  const processCroppedImage = async () => {
+    if (!imgRef.current || !canvasRef.current || !completedCrop) {
+      setError('Bild oder Crop-Bereich nicht verfügbar')
       return
     }
     
     const canvas = canvasRef.current
-    const video = videoRef.current
+    const image = imgRef.current
     const ctx = canvas.getContext('2d')
     
     if (!ctx) {
@@ -186,62 +117,36 @@ export default function Home() {
       return
     }
 
-    // Check if video is actually playing
-    if (video.readyState < 2) {
-      setError('Video ist noch nicht bereit. Bitte warten Sie einen Moment.')
-      return
-    }
-
-    // Check orientation - force landscape
-    const { videoWidth, videoHeight } = video
-    console.log(`Capturing from video: ${videoWidth}x${videoHeight}`)
-    
-    if (videoHeight > videoWidth) {
-      setError('❌ Bitte drehen Sie Ihr Gerät ins Querformat und versuchen Sie es erneut!')
-      return
-    }
-    
-    // Set canvas to landscape (16:9 aspect ratio)
+    // Set canvas to target size (1920x1080 landscape)
     canvas.width = 1920
     canvas.height = 1080
     
-    // Clear canvas and draw video frame
+    // Calculate scaling factor
+    const scaleX = image.naturalWidth / image.width
+    const scaleY = image.naturalHeight / image.height
+    
+    // Clear canvas
     ctx.fillStyle = '#000000'
     ctx.fillRect(0, 0, 1920, 1080)
     
-    // Draw video maintaining aspect ratio
-    const videoAspect = videoWidth / videoHeight
-    const canvasAspect = 1920 / 1080
-    
-    let drawWidth = 1920
-    let drawHeight = 1080
-    let drawX = 0
-    let drawY = 0
-    
-    if (videoAspect > canvasAspect) {
-      // Video is wider, fit to height
-      drawHeight = 1080
-      drawWidth = drawHeight * videoAspect
-      drawX = (1920 - drawWidth) / 2
-    } else {
-      // Video is taller, fit to width
-      drawWidth = 1920
-      drawHeight = drawWidth / videoAspect
-      drawY = (1080 - drawHeight) / 2
-    }
-    
-    ctx.drawImage(video, drawX, drawY, drawWidth, drawHeight)
+    // Draw cropped image scaled to fit canvas
+    ctx.drawImage(
+      image,
+      completedCrop.x * scaleX,
+      completedCrop.y * scaleY,
+      completedCrop.width * scaleX,
+      completedCrop.height * scaleY,
+      0,
+      0,
+      1920,
+      1080
+    )
     
     const dataUrl = canvas.toDataURL('image/jpeg', 0.9)
-    console.log('Photo captured, data URL length:', dataUrl.length)
-    
-    // Stop camera
-    const stream = video.srcObject as MediaStream
-    stream?.getTracks().forEach(track => track.stop())
+    console.log('Cropped image processed, data URL length:', dataUrl.length)
     
     setIsProcessing(true)
     setError(null)
-    setCameraError(null)
     
     try {
       // Send to moderation API
@@ -288,16 +193,23 @@ export default function Home() {
 
   const resetApp = () => {
     setCurrentStep('intro')
+    setUploadedImage(null)
     setCapturedImage(null)
     setImageId(null)
     setError(null)
-    setCameraError(null)
     setAcceptedTerms(false)
+    setCrop({
+      unit: 'px',
+      width: 400,
+      height: 250,
+      x: 0,
+      y: 0
+    })
+    setCompletedCrop(undefined)
     
-    // Clean up video stream
-    if (videoRef.current?.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream
-      stream.getTracks().forEach(track => track.stop())
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
     }
   }
 
@@ -408,69 +320,55 @@ export default function Home() {
             </div>
 
             <button
-              onClick={startCamera}
+              onClick={triggerFileUpload}
               disabled={!acceptedTerms}
               className="w-full bg-kn-blue text-white py-4 px-6 rounded-lg text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-kn-blue/90 transition-colors"
             >
-              Foto aufnehmen
+              📸 Foto auswählen
             </button>
+            
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
           </div>
         )}
 
-        {/* Camera Step */}
-        {currentStep === 'camera' && (
-          <div className="max-w-2xl mx-auto text-center space-y-6 camera-step">
+        {/* Crop Step */}
+        {currentStep === 'crop' && uploadedImage && (
+          <div className="max-w-4xl mx-auto text-center space-y-6">
             <h2 className="text-2xl font-bold text-kn-dark">
-              📸 Foto aufnehmen
+              ✂️ Bild zuschneiden
             </h2>
             
-            {!isLandscape && (
-              <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 p-3 rounded-lg text-center">
-                <p className="font-medium">📱🔄 Bitte Gerät ins Querformat drehen</p>
-              </div>
-            )}
+            <div className="bg-blue-50 border border-blue-200 text-blue-800 p-3 rounded-lg">
+              <p className="text-sm">
+                📏 Ziehen Sie den Rahmen, um Ihr Foto im <strong>16:9 Querformat</strong> zuzuschneiden
+              </p>
+            </div>
 
-            {cameraError && (
-              <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 p-3 rounded-lg text-sm font-medium">
-                {cameraError}
-              </div>
-            )}
-
-            <div className="relative bg-black rounded-lg overflow-hidden shadow-xl" style={{ aspectRatio: '16/9' }}>
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="w-full h-full object-cover"
-              />
-              
-              {/* Camera guide overlay */}
-              <div className="absolute inset-4 border-2 border-white/70 rounded-lg pointer-events-none">
-                <div className="absolute top-2 left-2 text-white text-sm bg-black/70 px-2 py-1 rounded">
-                  📍 Positioniere dich hier
-                </div>
-                
-                {/* Orientation indicator */}
-                <div className="absolute top-2 right-2 text-white text-xs bg-black/70 px-2 py-1 rounded">
-                  📏 16:9 Querformat
-                </div>
-                
-                {/* Center guide */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-32 h-32 border-2 border-white/30 rounded-full"></div>
-                </div>
-              </div>
-              
-              {/* Loading overlay - only show when camera is actually starting */}
-              {currentStep === 'camera' && !videoRef.current && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/80">
-                  <div className="text-white text-center">
-                    <div className="animate-spin w-8 h-8 border-2 border-white border-t-transparent rounded-full mx-auto mb-2"></div>
-                    <p>Kamera wird geladen...</p>
-                  </div>
-                </div>
-              )}
+            <div className="bg-white rounded-lg p-4 shadow-lg">
+              <ReactCrop
+                crop={crop}
+                onChange={(c) => setCrop(c)}
+                onComplete={(c) => setCompletedCrop(c)}
+                aspect={16/9}
+                minWidth={200}
+                minHeight={112}
+              >
+                {uploadedImage && (
+                  <img
+                    ref={imgRef}
+                    src={uploadedImage}
+                    alt="Zu beschneidendes Bild"
+                    className="max-w-full max-h-96 object-contain"
+                  />
+                )}
+              </ReactCrop>
             </div>
 
             <div className="flex space-x-4">
@@ -481,24 +379,16 @@ export default function Home() {
                 ✖️ Abbrechen
               </button>
               <button
-                onClick={capturePhoto}
-                disabled={isProcessing || !!cameraError || !isLandscape}
-                className={`flex-1 py-3 px-6 rounded-lg font-medium transition-all duration-300 ${
-                  isLandscape && !isProcessing && !cameraError
-                    ? 'bg-kn-green text-white hover:bg-kn-green/90 cursor-pointer'
-                    : 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                }`}
+                onClick={processCroppedImage}
+                disabled={isProcessing || !completedCrop}
+                className="flex-1 bg-kn-green text-white py-3 px-6 rounded-lg font-medium disabled:opacity-50 hover:bg-kn-green/90 transition-colors"
               >
-                {isProcessing 
-                  ? '⏳ Verarbeite...' 
-                  : !isLandscape 
-                  ? '🔄 Querformat erforderlich' 
-                  : '📸 Foto aufnehmen'}
+                {isProcessing ? '⏳ Verarbeite...' : '✅ Foto verwenden'}
               </button>
             </div>
             
             <p className="text-xs text-gray-600">
-              Das aufgenommene Foto wird automatisch auf Inhalte überprüft und verarbeitet.
+              Das zugeschnittene Foto wird automatisch auf Inhalte überprüft und verarbeitet.
             </p>
           </div>
         )}
