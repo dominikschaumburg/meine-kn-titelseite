@@ -57,8 +57,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Get random template
+    // Get random template (force fresh read in development)
     const template = await getRandomTemplate()
+    console.log('Using template with config:', JSON.stringify(template.config, null, 2))
     
     // Load images
     const userImage = await loadImage(image)

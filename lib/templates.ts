@@ -44,8 +44,10 @@ export async function getRandomTemplate(): Promise<Template> {
           await fs.access(foregroundPath)
           await fs.access(configPath)
           
+          // Read config file fresh every time (no caching for development)
           const configData = await fs.readFile(configPath, 'utf-8')
           const config: TemplateConfig = JSON.parse(configData)
+          console.log(`Loaded config for template ${dir}:`, JSON.stringify(config.userImagePosition))
           
           validTemplates.push({
             id: dir,
@@ -53,8 +55,9 @@ export async function getRandomTemplate(): Promise<Template> {
             foregroundPath,
             config
           })
-        } catch {
+        } catch (error) {
           // Skip invalid templates
+          console.log(`Skipping template ${dir}:`, error)
         }
       }
     }
@@ -85,6 +88,7 @@ export async function getTemplateById(id: string): Promise<Template | null> {
     
     const configData = await fs.readFile(configPath, 'utf-8')
     const config: TemplateConfig = JSON.parse(configData)
+    console.log(`getTemplateById(${id}):`, JSON.stringify(config.userImagePosition))
     
     return {
       id,
