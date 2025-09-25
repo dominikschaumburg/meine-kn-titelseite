@@ -456,10 +456,9 @@ export default function Home() {
                   alt="Generierte Titelseite"
                   width={400}
                   height={400}
-                  className="w-full h-auto pointer-events-none"
+                  className={`w-full h-auto pointer-events-none ${!isDOICompleted ? 'preview-blur' : ''}`}
                   draggable={false}
                 />
-                {!isDOICompleted && <div className="watermark" />}
                 
                 {/* Invisible overlay to prevent saving */}
                 {!isDOICompleted && (
@@ -471,17 +470,17 @@ export default function Home() {
             {!isDOICompleted ? (
               <div className="bg-yellow-50 border border-yellow-400 text-yellow-800 p-4 rounded-lg">
                 <p className="text-sm font-medium mb-2">
-                  📧 E-Mail bestätigen für wasserzeichenfreie Version
+                  📧 E-Mail bestätigen für scharfe Version
                 </p>
                 <p className="text-xs">
-                  Klicken Sie auf "Wasserzeichen entfernen" um Ihre E-Mail zu bestätigen 
-                  und das Bild ohne Wasserzeichen zu erhalten. Das Bild bleibt 24 Stunden verfügbar.
+                  Klicken Sie auf "Bild schärfen" um Ihre E-Mail zu bestätigen 
+                  und das Bild in voller Schärfe zu erhalten. Das Bild bleibt 24 Stunden verfügbar.
                 </p>
               </div>
             ) : (
               <div className="bg-green-50 border border-green-400 text-green-800 p-4 rounded-lg">
                 <p className="text-sm font-medium">
-                  ✅ Wasserzeichen erfolgreich entfernt! 
+                  ✅ Bild erfolgreich geschärft! 
                   Sie können das Bild jetzt herunterladen oder teilen.
                 </p>
               </div>
@@ -500,7 +499,7 @@ export default function Home() {
                     onClick={openRegistration}
                     className="flex-2 bg-kn-blue text-white py-3 px-4 rounded-lg font-medium hover:bg-kn-blue/90 transition-colors text-sm"
                   >
-                    ✨ Wasserzeichen entfernen
+                    ✨ Bild schärfen
                   </button>
                 </div>
               ) : (
@@ -510,13 +509,13 @@ export default function Home() {
                       onClick={downloadImage}
                       className="flex-1 bg-kn-green text-white py-3 px-4 rounded-lg font-medium hover:bg-kn-green/90 transition-colors text-sm"
                     >
-                      📥 Download
+                      💾 Download
                     </button>
                     <button
                       onClick={shareImage}
                       className="flex-1 bg-kn-blue text-white py-3 px-4 rounded-lg font-medium hover:bg-kn-blue/90 transition-colors text-sm"
                     >
-                      📤 Teilen
+                      🔗 Teilen
                     </button>
                   </div>
                   <button

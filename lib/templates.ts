@@ -6,6 +6,7 @@ export interface UserImagePosition {
   y: number
   width: number
   height: number
+  rotation?: number // Rotation in degrees
 }
 
 export interface TemplateConfig {

@@ -72,14 +72,29 @@ export async function POST(request: NextRequest) {
     // 1. Draw background layer
     ctx.drawImage(backgroundImage, 0, 0, 1920, 1920)
     
-    // 2. Draw user image with template-specific positioning
+    // 2. Draw user image with template-specific positioning and rotation
     const pos = template.config.userImagePosition
     const userImageCanvas = await cropAndFitImage(userImage, pos.width, pos.height)
+    
+    // Save canvas state for rotation
+    ctx.save()
+    
+    // Move to center of user image position and rotate if needed
+    if (pos.rotation && pos.rotation !== 0) {
+      const centerX = pos.x + pos.width / 2
+      const centerY = pos.y + pos.height / 2
+      ctx.translate(centerX, centerY)
+      ctx.rotate((pos.rotation * Math.PI) / 180)
+      ctx.translate(-centerX, -centerY)
+    }
     
     ctx.drawImage(
       userImageCanvas,
       pos.x, pos.y, pos.width, pos.height
     )
+    
+    // Restore canvas state
+    ctx.restore()
     
     // 3. Draw foreground layer (important: this comes AFTER user image)
     ctx.drawImage(foregroundImage, 0, 0, 1920, 1920)

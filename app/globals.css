@@ -35,17 +35,9 @@ body {
   color: #2a3845;
 }
 
-.watermark {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url('/api/watermark') no-repeat center center;
-  background-size: 50%;
-  opacity: 0.3;
+.preview-blur {
+  filter: blur(8px);
   pointer-events: none;
-  z-index: 10;
 }
 
 /* Mobile orientation hints */
