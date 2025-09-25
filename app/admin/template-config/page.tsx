@@ -25,6 +25,7 @@ export default function TemplateConfigPage() {
     height: 300,
     rotation: 0
   })
+  const [jsonOutput, setJsonOutput] = useState<string>('')
   const [dragState, setDragState] = useState<DragState>({
     isDragging: false,
     isResizing: false,
@@ -105,8 +106,8 @@ export default function TemplateConfigPage() {
 
     const currentX = event.clientX - rect.left
     const currentY = event.clientY - rect.top
-    const deltaX = currentX - dragState.startX
-    const deltaY = currentY - dragState.startY
+    const deltaX = (currentX - dragState.startX) * (1920 / 600) // Scale to actual template size
+    const deltaY = (currentY - dragState.startY) * (1920 / 600)
 
     if (dragState.isDragging) {
       setPosition(prev => ({
@@ -124,13 +125,14 @@ export default function TemplateConfigPage() {
         height: Math.min(newHeight, 1920 - prev.y)
       }))
     } else if (dragState.isRotating) {
-      const centerX = position.x + position.width / 2
-      const centerY = position.y + position.height / 2
-      const angle = Math.atan2(currentY - centerY, currentX - centerX) * 180 / Math.PI
+      // Calculate rotation based on mouse position relative to center of image
+      const scaledCenterX = (position.x + position.width / 2) * (600 / 1920)
+      const scaledCenterY = (position.y + position.height / 2) * (600 / 1920)
+      const angle = Math.atan2(currentY - scaledCenterY, currentX - scaledCenterX) * 180 / Math.PI
       
       setPosition(prev => ({
         ...prev,
-        rotation: Math.round(angle)
+        rotation: Math.round(angle * 10) / 10 // Round to 1 decimal place
       }))
     }
   }
@@ -146,12 +148,18 @@ export default function TemplateConfigPage() {
     })
   }
 
+  // Update JSON output whenever position changes
+  useEffect(() => {
+    const output = JSON.stringify(position, null, 2)
+    setJsonOutput(output)
+  }, [position])
+
   const exportConfig = () => {
     const config: TemplateConfig = {
       id: templateId,
       name: `Template ${templateId}`,
       userImagePosition: position,
-      description: `Auto-generated config for template ${templateId}`
+      description: `Auto-generierte Konfiguration für Template ${templateId}`
     }
 
     const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' })
@@ -163,15 +171,20 @@ export default function TemplateConfigPage() {
     URL.revokeObjectURL(url)
   }
 
+  const copyJsonToClipboard = () => {
+    navigator.clipboard.writeText(jsonOutput)
+    alert('userImagePosition in die Zwischenablage kopiert!')
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Template Configuration Tool</h1>
+        <h1 className="text-3xl font-bold mb-6">Template Konfigurationstool</h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Controls */}
           <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-xl font-bold mb-4">Controls</h2>
+            <h2 className="text-xl font-bold mb-4">Steuerung</h2>
             
             <div className="space-y-4">
               <div>
@@ -186,12 +199,12 @@ export default function TemplateConfigPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Sample User Image</label>
+                <label className="block text-sm font-medium mb-2">Beispiel Nutzerbild</label>
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
                 >
-                  Upload Sample Image
+                  Bild hochladen
                 </button>
                 <input
                   ref={fileInputRef}
@@ -222,7 +235,7 @@ export default function TemplateConfigPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Width</label>
+                  <label className="block text-sm font-medium mb-1">Breite</label>
                   <input
                     type="number"
                     value={position.width}
@@ -231,7 +244,7 @@ export default function TemplateConfigPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Height</label>
+                  <label className="block text-sm font-medium mb-1">Höhe</label>
                   <input
                     type="number"
                     value={position.height}
@@ -243,8 +256,9 @@ export default function TemplateConfigPage() {
                   <label className="block text-sm font-medium mb-1">Rotation (°)</label>
                   <input
                     type="number"
+                    step="0.1"
                     value={position.rotation || 0}
-                    onChange={(e) => setPosition(prev => ({ ...prev, rotation: parseInt(e.target.value) || 0 }))}
+                    onChange={(e) => setPosition(prev => ({ ...prev, rotation: parseFloat(e.target.value) || 0 }))}
                     className="w-full border rounded px-2 py-1 text-sm"
                     min="-180"
                     max="180"
@@ -252,18 +266,36 @@ export default function TemplateConfigPage() {
                 </div>
               </div>
 
-              <button
-                onClick={exportConfig}
-                className="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
-              >
-                📋 Export Config
-              </button>
+              <div className="space-y-3">
+                <button
+                  onClick={copyJsonToClipboard}
+                  className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                >
+                  📋 JSON kopieren
+                </button>
+                <button
+                  onClick={exportConfig}
+                  className="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
+                >
+                  💾 Config exportieren
+                </button>
+              </div>
+              
+              <div className="mt-4">
+                <label className="block text-sm font-medium mb-2">userImagePosition:</label>
+                <textarea
+                  value={jsonOutput}
+                  readOnly
+                  className="w-full border rounded px-3 py-2 text-xs font-mono bg-gray-50 h-32 resize-none"
+                  onClick={(e) => e.currentTarget.select()}
+                />
+              </div>
             </div>
           </div>
 
           {/* Canvas */}
           <div className="lg:col-span-2 bg-white p-4 rounded-lg shadow-lg">
-            <h2 className="text-xl font-bold mb-4">Template Preview (1920x1920)</h2>
+            <h2 className="text-xl font-bold mb-4">Template Vorschau (1920x1920)</h2>
             
             <div 
               ref={canvasRef}
@@ -330,12 +362,12 @@ export default function TemplateConfigPage() {
             </div>
 
             <div className="mt-4 text-sm text-gray-600">
-              <p><strong>Instructions:</strong></p>
+              <p><strong>Anleitung:</strong></p>
               <ul className="list-disc list-inside space-y-1">
-                <li>Drag blue rectangle to move user image</li>
-                <li>Drag blue square (bottom-right) to resize</li>
-                <li>Drag red dot (top) to rotate</li>
-                <li>Use input fields for precise values</li>
+                <li>Blaues Rechteck ziehen um Nutzerbild zu verschieben</li>
+                <li>Blaues Quadrat (unten-rechts) ziehen um Größe zu ändern</li>
+                <li>Roten Punkt (oben) ziehen um zu rotieren</li>
+                <li>Eingabefelder für präzise Werte verwenden</li>
               </ul>
             </div>
           </div>
