@@ -2,11 +2,11 @@
   "id": "2",
   "name": "KN Zeitung Template 2",
   "userImagePosition": {
-    "x": 112,
-    "y": 847,
-    "width": 1364,
-    "height": 778,
-    "rotation": -4.5
-  },
+  "x": 211.2,
+  "y": 799,
+  "width": 1194.4,
+  "height": 672.4,
+  "rotation": -5.3
+},
   "description": "Template mit Daumen-Overlay für authentische Zeitungsoptik"
 }
