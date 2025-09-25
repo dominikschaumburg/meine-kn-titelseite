@@ -23,9 +23,9 @@ Das neue System verwendet **LocalStorage** und **Timestamp-basierte Erkennung** 
 localStorage.setItem('kn_doi_completed', Date.now().toString());
 console.log('DOI marked as completed at:', new Date().toISOString());
 
-// Optional: Benutzer zurück zur App leiten nach 3 Sekunden
+// Optional: Benutzer zurück zur App leiten nach 3 Sekunden mit DOI-Parameter
 setTimeout(() => {
-    window.location.href = 'https://meine-kn-titelseite.de';
+    window.location.href = 'https://meine-kn-titelseite.de?doi_completed=' + Date.now();
 }, 3000);
 </script>
 ```
@@ -55,9 +55,9 @@ if (window.opener) {
         console.log('Could not notify parent window');
     }
 } else {
-    // Normale Weiterleitung
+    // Normale Weiterleitung mit DOI-Parameter
     setTimeout(() => {
-        window.location.href = 'https://meine-kn-titelseite.de';
+        window.location.href = 'https://meine-kn-titelseite.de?doi_completed=' + Date.now();
     }, 3000);
 }
 </script>

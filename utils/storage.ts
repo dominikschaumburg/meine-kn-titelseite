@@ -85,21 +85,39 @@ export class KNStorage {
     
     try {
       const currentSession = this.getCurrentSession()
-      if (!currentSession || !currentSession.registrationStartTime) return false
+      if (!currentSession) return false
+      
+      // Check URL parameters first (cross-domain DOI completion)
+      const urlParams = new URLSearchParams(window.location.search)
+      const doiFromURL = urlParams.get('doi_completed')
+      if (doiFromURL) {
+        const doiTimestamp = parseInt(doiFromURL)
+        if (!isNaN(doiTimestamp)) {
+          // Store DOI completion in localStorage for persistence
+          localStorage.setItem(`${this.PREFIX}doi_completed`, doiTimestamp.toString())
+          // Clear URL parameter to prevent reprocessing
+          const newUrl = new URL(window.location.href)
+          newUrl.searchParams.delete('doi_completed')
+          window.history.replaceState({}, '', newUrl.toString())
+        }
+      }
       
       const doiCompletedTime = localStorage.getItem(`${this.PREFIX}doi_completed`)
       if (!doiCompletedTime) return false
       
       const doiTimestamp = parseInt(doiCompletedTime)
-      const registrationStart = currentSession.registrationStartTime
       
-      // DOI must be completed after registration started (with grace period)
-      const isValidTiming = doiTimestamp > (registrationStart - this.DOI_GRACE_PERIOD)
+      // If we have a registration start time, validate timing
+      if (currentSession.registrationStartTime) {
+        // DOI must be completed after registration started (with grace period)
+        const isValidTiming = doiTimestamp > (currentSession.registrationStartTime - this.DOI_GRACE_PERIOD)
+        if (!isValidTiming) return false
+      }
       
       // DOI must not be older than 24h
       const isNotExpired = Date.now() - doiTimestamp < this.SESSION_DURATION
       
-      return isValidTiming && isNotExpired
+      return isNotExpired
     } catch (error) {
       console.error('Failed to check DOI status:', error)
       return false
