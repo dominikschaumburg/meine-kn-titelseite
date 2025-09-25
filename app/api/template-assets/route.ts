@@ -20,8 +20,23 @@ export async function GET(request: NextRequest) {
     
     switch (type) {
       case 'background':
-        filePath = path.join(templateDir, 'background.jpg')
-        contentType = 'image/jpeg'
+        // Try both .jpg and .png for background
+        const backgroundJpg = path.join(templateDir, 'background.jpg')
+        const backgroundPng = path.join(templateDir, 'background.png')
+        
+        try {
+          await fs.access(backgroundJpg)
+          filePath = backgroundJpg
+          contentType = 'image/jpeg'
+        } catch {
+          try {
+            await fs.access(backgroundPng)
+            filePath = backgroundPng
+            contentType = 'image/png'
+          } catch {
+            return NextResponse.json({ error: 'Background file not found' }, { status: 404 })
+          }
+        }
         break
       case 'foreground':
         filePath = path.join(templateDir, 'foreground.png')

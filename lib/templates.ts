@@ -35,12 +35,23 @@ export async function getRandomTemplate(): Promise<Template> {
       const stat = await fs.stat(templatePath)
       
       if (stat.isDirectory()) {
-        const backgroundPath = path.join(templatePath, 'background.jpg')
+        const backgroundJpgPath = path.join(templatePath, 'background.jpg')
+        const backgroundPngPath = path.join(templatePath, 'background.png')
         const foregroundPath = path.join(templatePath, 'foreground.png')
         const configPath = path.join(templatePath, 'config.json')
         
+        let backgroundPath: string
+        
         try {
-          await fs.access(backgroundPath)
+          // Try to find background file (.jpg or .png)
+          try {
+            await fs.access(backgroundJpgPath)
+            backgroundPath = backgroundJpgPath
+          } catch {
+            await fs.access(backgroundPngPath)
+            backgroundPath = backgroundPngPath
+          }
+          
           await fs.access(foregroundPath)
           await fs.access(configPath)
           
@@ -78,11 +89,22 @@ export async function getTemplateById(id: string): Promise<Template | null> {
   const templatePath = path.join(templatesDir, id)
   
   try {
-    const backgroundPath = path.join(templatePath, 'background.jpg')
+    const backgroundJpgPath = path.join(templatePath, 'background.jpg')
+    const backgroundPngPath = path.join(templatePath, 'background.png')
     const foregroundPath = path.join(templatePath, 'foreground.png')
     const configPath = path.join(templatePath, 'config.json')
     
-    await fs.access(backgroundPath)
+    let backgroundPath: string
+    
+    // Try to find background file (.jpg or .png)
+    try {
+      await fs.access(backgroundJpgPath)
+      backgroundPath = backgroundJpgPath
+    } catch {
+      await fs.access(backgroundPngPath)
+      backgroundPath = backgroundPngPath
+    }
+    
     await fs.access(foregroundPath)
     await fs.access(configPath)
     
