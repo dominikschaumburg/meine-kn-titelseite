@@ -43,14 +43,24 @@ export default function TemplateConfigPage() {
 
   const loadTemplate = async () => {
     try {
-      // Load template images
-      setBackgroundImage(`/templates/${templateId}/background.jpg`)
-      setForegroundImage(`/templates/${templateId}/foreground.png`)
+      // Check if template files exist and load them
+      const backgroundResponse = await fetch(`/api/template-assets?id=${templateId}&type=background`)
+      const foregroundResponse = await fetch(`/api/template-assets?id=${templateId}&type=foreground`)
+      
+      if (backgroundResponse.ok) {
+        const backgroundBlob = await backgroundResponse.blob()
+        setBackgroundImage(URL.createObjectURL(backgroundBlob))
+      }
+      
+      if (foregroundResponse.ok) {
+        const foregroundBlob = await foregroundResponse.blob()
+        setForegroundImage(URL.createObjectURL(foregroundBlob))
+      }
       
       // Load existing config
-      const response = await fetch(`/templates/${templateId}/config.json`)
-      if (response.ok) {
-        const config: TemplateConfig = await response.json()
+      const configResponse = await fetch(`/api/template-assets?id=${templateId}&type=config`)
+      if (configResponse.ok) {
+        const config: TemplateConfig = await configResponse.json()
         setPosition(config.userImagePosition)
       }
     } catch (error) {
