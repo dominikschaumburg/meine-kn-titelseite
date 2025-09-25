@@ -281,17 +281,12 @@ export default function Home() {
         const file = new File([blob], `kn-titelseite-${imageId || Date.now()}.jpg`, { type: 'image/jpeg' })
 
         await navigator.share({
-          title: 'Meine KN Titelseite',
-          text: 'Schau dir meine personalisierte KN Titelseite an!',
           files: [file]
         })
       } catch (error) {
         console.error('Sharing failed:', error)
-        // Fallback: copy link
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText(window.location.href)
-          alert('Link wurde in die Zwischenablage kopiert!')
-        }
+        // Fallback: silent fail
+        console.log('Sharing not supported or failed')
       }
     }
   }
