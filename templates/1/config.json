@@ -2,11 +2,11 @@
   "id": "1",
   "name": "Meine KN Titelseite",
   "userImagePosition": {
-  "x": 211.2,
-  "y": 799,
-  "width": 1194.4,
-  "height": 672.4,
-  "rotation": -5.3
-},
-  "description": "Template für die Titelseite der Kieler Nachrichten mit einem leichten Overlay über dem Bild und keinem Hintergrund.",
+    "x": 211.2,
+    "y": 799,
+    "width": 1194.4,
+    "height": 672.4,
+    "rotation": -5.3
+  },
+  "description": "Template für die Titelseite der Kieler Nachrichten mit einem leichten Overlay über dem Bild und keinem Hintergrund."
 }
