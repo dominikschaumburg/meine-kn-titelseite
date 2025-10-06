@@ -33,7 +33,15 @@ export async function POST(request: NextRequest) {
     })
 
     const result = response.results[0]
-    
+
+    // Log moderation statistics
+    console.log('[Moderation Stats]', {
+      timestamp: new Date().toISOString(),
+      flagged: result.flagged,
+      categories: result.categories,
+      category_scores: result.category_scores
+    })
+
     return NextResponse.json({
       flagged: result.flagged,
       categories: result.categories,

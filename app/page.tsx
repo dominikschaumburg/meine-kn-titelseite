@@ -292,7 +292,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-kn-light flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
       <header className="py-6 px-4">
         <div className="w-full max-w-sm mx-auto md:max-w-xs">
@@ -312,24 +312,24 @@ export default function Home() {
         {/* Intro Step */}
         {currentStep === 'intro' && (
           <div className="max-w-md mx-auto text-center space-y-6">
-            <h1 className="text-3xl font-bold text-kn-dark mb-4">
-              Meine KN Titelseite
-            </h1>
-            
-            <p className="text-lg text-kn-dark/80 mb-6">
-              Erstelle deine personalisierte Titelseite mit einem Selfie. 
-              Halte dein Smartphone horizontal und mache ein Foto von dir.
-            </p>
-            
             <div className="mb-6">
-              <Image 
-                src="/assets/screenshot.png"
+              <Image
+                src="/assets/preview.gif"
                 alt="Beispiel Titelseite"
                 width={300}
                 height={200}
                 className="rounded-lg shadow-lg mx-auto"
               />
             </div>
+
+            <h1 className="text-3xl font-bold text-kn-dark mb-4">
+              Meine KN Titelseite
+            </h1>
+
+            <p className="text-lg text-kn-dark/80 mb-6">
+              Erstelle deine personalisierte Titelseite mit einem Selfie.
+              Halte dein Smartphone horizontal und mache ein Foto von dir.
+            </p>
 
             {error && (
               <div className="bg-kn-red/10 border border-kn-red text-kn-red p-4 rounded-lg mb-4">
@@ -376,12 +376,12 @@ export default function Home() {
         {currentStep === 'crop' && uploadedImage && (
           <div className="max-w-4xl mx-auto text-center space-y-6">
             <h2 className="text-2xl font-bold text-kn-dark">
-              ✂️ Bild zuschneiden
+              ✂️ Foto zuschneiden
             </h2>
             
             <div className="bg-blue-50 border border-blue-200 text-blue-800 p-3 rounded-lg">
               <p className="text-sm">
-                📏 Ziehen Sie den Rahmen, um Ihr Foto im <strong>16:9 Querformat</strong> zuzuschneiden
+                📏 Ziehe den Rahmen, um dein Foto im <strong>16:9 Querformat</strong> zuzuschneiden
               </p>
             </div>
 
@@ -431,7 +431,7 @@ export default function Home() {
         {currentStep === 'preview' && capturedImage && (
           <div className="max-w-md mx-auto text-center space-y-6">
             <h2 className="text-2xl font-bold text-kn-dark">
-              {isDOICompleted ? '🎉 Ihre KN Titelseite' : 'Ihre KN Titelseite'}
+              {isDOICompleted ? '🎉 Deine KN Titelseite' : 'Deine KN Titelseite'}
             </h2>
 
             <div className="relative bg-white rounded-lg shadow-lg overflow-hidden select-none">
@@ -468,15 +468,15 @@ export default function Home() {
                   📧 E-Mail bestätigen für scharfe Version
                 </p>
                 <p className="text-xs">
-                  Klicken Sie auf "Bild schärfen" um Ihre E-Mail zu bestätigen 
+                  Klicke auf "Bild schärfen" um deine E-Mail zu bestätigen
                   und das Bild in voller Schärfe zu erhalten. Das Bild bleibt 24 Stunden verfügbar.
                 </p>
               </div>
             ) : (
               <div className="bg-green-50 border border-green-400 text-green-800 p-4 rounded-lg">
                 <p className="text-sm font-medium">
-                  ✅ Bild erfolgreich geschärft! 
-                  Sie können das Bild jetzt herunterladen oder teilen.
+                  ✅ Bild erfolgreich geschärft!
+                  Du kannst das Bild jetzt herunterladen oder teilen.
                 </p>
               </div>
             )}
