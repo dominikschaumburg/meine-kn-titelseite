@@ -3,41 +3,105 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: 'DINNext';
-  src: url('../assets/fonts/DINNextLTW05-Regular.woff2') format('woff2'),
-       url('../assets/fonts/DINNextLTW05-Regular.woff') format('woff');
+  font-family: 'Inter';
+  src: url('../assets/fonts/Inter-Regular-slnt=0.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'DINNext';
-  src: url('../assets/fonts/DINNextLTW05-Medium.woff2') format('woff2'),
-       url('../assets/fonts/DINNextLTW05-Medium.woff') format('woff');
-  font-weight: 500;
+  font-family: 'Inter';
+  src: url('../assets/fonts/Inter-Bold-slnt=0.ttf') format('truetype');
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'DINNext';
-  src: url('../assets/fonts/DINNextLTW05-Bold.woff2') format('woff2'),
-       url('../assets/fonts/DINNextLTW05-Bold.woff') format('woff');
+  font-family: 'DIN Next LT Pro';
+  src: url('/assets/fonts/DINNextLTW05-Bold.woff2') format('woff2'),
+       url('/assets/fonts/DINNextLTW05-Bold.woff') format('woff');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 
 body {
-  font-family: 'DINNext', sans-serif;
-  background-color: #eef3f5;
+  font-family: 'Inter', sans-serif;
+  background-color: #ffffff;
   color: #2a3845;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'DIN Next LT Pro', sans-serif;
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+strong, b {
+  font-weight: 700;
 }
 
 .preview-blur {
   filter: blur(4px);
   pointer-events: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes pulseOnce {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-pulse-once {
+  animation: pulseOnce 2s ease-in-out 1;
+  animation-delay: 0.5s;
+}
+
+@keyframes highlightPrize {
+  0%, 100% {
+    text-shadow: 0 0 8px rgba(79, 128, 255, 0.6);
+    transform: scale(1);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(79, 128, 255, 1), 0 0 30px rgba(79, 128, 255, 0.8);
+    transform: scale(1.08);
+  }
+}
+
+.highlight-prize {
+  display: inline-block;
+  color: #4F80FF;
+  text-decoration: underline;
+  text-decoration-color: #4F80FF;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 4px;
+  animation: highlightPrize 1.5s ease-in-out infinite;
+  font-weight: 900;
 }
 
 /* Mobile orientation hints */

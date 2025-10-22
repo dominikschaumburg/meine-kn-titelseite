@@ -18,8 +18,8 @@ export interface TemplateConfig {
 
 export interface Template {
   id: string
-  backgroundPath: string
-  foregroundPath: string
+  backgroundPath?: string
+  foregroundPath?: string
   config: TemplateConfig
 }
 
@@ -39,31 +39,45 @@ export async function getRandomTemplate(): Promise<Template> {
         const backgroundPngPath = path.join(templatePath, 'background.png')
         const foregroundPath = path.join(templatePath, 'foreground.png')
         const configPath = path.join(templatePath, 'config.json')
-        
-        let backgroundPath: string
-        
+
         try {
-          // Try to find background file (.jpg or .png)
-          try {
-            await fs.access(backgroundJpgPath)
-            backgroundPath = backgroundJpgPath
-          } catch {
-            await fs.access(backgroundPngPath)
-            backgroundPath = backgroundPngPath
-          }
-          
-          await fs.access(foregroundPath)
+          // Config is required
           await fs.access(configPath)
-          
+
           // Read config file fresh every time (no caching for development)
           const configData = await fs.readFile(configPath, 'utf-8')
           const config: TemplateConfig = JSON.parse(configData)
           console.log(`Loaded config for template ${dir}:`, JSON.stringify(config.userImagePosition))
-          
+
+          // Try to find background file (.jpg or .png) - optional
+          let backgroundPath: string | undefined
+          try {
+            await fs.access(backgroundJpgPath)
+            backgroundPath = backgroundJpgPath
+          } catch {
+            try {
+              await fs.access(backgroundPngPath)
+              backgroundPath = backgroundPngPath
+            } catch {
+              // Background is optional
+              backgroundPath = undefined
+            }
+          }
+
+          // Try to find foreground file - optional
+          let foregroundPathFinal: string | undefined
+          try {
+            await fs.access(foregroundPath)
+            foregroundPathFinal = foregroundPath
+          } catch {
+            // Foreground is optional
+            foregroundPathFinal = undefined
+          }
+
           validTemplates.push({
             id: dir,
             backgroundPath,
-            foregroundPath,
+            foregroundPath: foregroundPathFinal,
             config
           })
         } catch (error) {
@@ -87,35 +101,49 @@ export async function getRandomTemplate(): Promise<Template> {
 export async function getTemplateById(id: string): Promise<Template | null> {
   const templatesDir = path.join(process.cwd(), 'templates')
   const templatePath = path.join(templatesDir, id)
-  
+
   try {
     const backgroundJpgPath = path.join(templatePath, 'background.jpg')
     const backgroundPngPath = path.join(templatePath, 'background.png')
     const foregroundPath = path.join(templatePath, 'foreground.png')
     const configPath = path.join(templatePath, 'config.json')
-    
-    let backgroundPath: string
-    
-    // Try to find background file (.jpg or .png)
+
+    // Config is required
+    await fs.access(configPath)
+
+    const configData = await fs.readFile(configPath, 'utf-8')
+    const config: TemplateConfig = JSON.parse(configData)
+    console.log(`getTemplateById(${id}):`, JSON.stringify(config.userImagePosition))
+
+    // Try to find background file (.jpg or .png) - optional
+    let backgroundPath: string | undefined
     try {
       await fs.access(backgroundJpgPath)
       backgroundPath = backgroundJpgPath
     } catch {
-      await fs.access(backgroundPngPath)
-      backgroundPath = backgroundPngPath
+      try {
+        await fs.access(backgroundPngPath)
+        backgroundPath = backgroundPngPath
+      } catch {
+        // Background is optional
+        backgroundPath = undefined
+      }
     }
-    
-    await fs.access(foregroundPath)
-    await fs.access(configPath)
-    
-    const configData = await fs.readFile(configPath, 'utf-8')
-    const config: TemplateConfig = JSON.parse(configData)
-    console.log(`getTemplateById(${id}):`, JSON.stringify(config.userImagePosition))
-    
+
+    // Try to find foreground file - optional
+    let foregroundPathFinal: string | undefined
+    try {
+      await fs.access(foregroundPath)
+      foregroundPathFinal = foregroundPath
+    } catch {
+      // Foreground is optional
+      foregroundPathFinal = undefined
+    }
+
     return {
       id,
       backgroundPath,
-      foregroundPath,
+      foregroundPath: foregroundPathFinal,
       config
     }
   } catch {

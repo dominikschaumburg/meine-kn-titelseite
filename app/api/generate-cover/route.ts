@@ -63,15 +63,21 @@ export async function POST(request: NextRequest) {
     
     // Load images
     const userImage = await loadImage(image)
-    const backgroundImage = await loadImage(template.backgroundPath)
-    const foregroundImage = await loadImage(template.foregroundPath)
-    
+    const backgroundImage = template.backgroundPath ? await loadImage(template.backgroundPath) : null
+    const foregroundImage = template.foregroundPath ? await loadImage(template.foregroundPath) : null
+
     // Create main canvas (1920x1920)
     const canvas = createCanvas(1920, 1920)
     const ctx = canvas.getContext('2d')
-    
-    // 1. Draw background layer
-    ctx.drawImage(backgroundImage, 0, 0, 1920, 1920)
+
+    // 1. Draw background layer (if exists)
+    if (backgroundImage) {
+      ctx.drawImage(backgroundImage, 0, 0, 1920, 1920)
+    } else {
+      // Fill with white background if no background image
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, 1920, 1920)
+    }
     
     // 2. Draw user image with template-specific positioning and rotation
     const pos = template.config.userImagePosition
@@ -96,9 +102,11 @@ export async function POST(request: NextRequest) {
     
     // Restore canvas state
     ctx.restore()
-    
-    // 3. Draw foreground layer (important: this comes AFTER user image)
-    ctx.drawImage(foregroundImage, 0, 0, 1920, 1920)
+
+    // 3. Draw foreground layer (if exists) - important: this comes AFTER user image
+    if (foregroundImage) {
+      ctx.drawImage(foregroundImage, 0, 0, 1920, 1920)
+    }
     
     // Convert to buffer
     const buffer = canvas.toBuffer('image/jpeg', { quality: 0.9 })

@@ -15,7 +15,10 @@ module.exports = {
         'kn-dark': '#2a3845',
       },
       fontFamily: {
-        'din': ['DINNext', 'sans-serif'],
+        'inter': ['Inter', 'sans-serif'],
+      },
+      borderRadius: {
+        'kn': '4px',
       },
     },
   },
