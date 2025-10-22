@@ -30,7 +30,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 
 /**
  * Render the template with the user's cropped image client-side
- * @param croppedImageDataUrl - The user's cropped image as a data URL
+ * @param croppedImageDataUrl - The user's cropped image as a data URL (must be 1920x1080)
  * @param templateConfig - The template configuration
  * @returns A Promise that resolves with the final image as a data URL
  */
@@ -38,19 +38,28 @@ export async function renderTemplate(
   croppedImageDataUrl: string,
   templateConfig: TemplateConfig
 ): Promise<string> {
-  // Create canvas (1920x1920)
+  // Create canvas with FIXED size (1920x1920) - independent of viewport
   const canvas = document.createElement('canvas')
   canvas.width = 1920
   canvas.height = 1920
-  const ctx = canvas.getContext('2d')
+
+  const ctx = canvas.getContext('2d', {
+    alpha: false, // No alpha channel for better performance
+    desynchronized: true
+  })
 
   if (!ctx) {
     throw new Error('Could not get canvas context')
   }
 
-  // 1. Draw background layer if it exists
+  // Disable image smoothing for pixel-perfect rendering
+  ctx.imageSmoothingEnabled = true
+  ctx.imageSmoothingQuality = 'high'
+
+  // 1. Draw background layer (ALWAYS 1920x1920)
   if (templateConfig.backgroundPath) {
     const backgroundImage = await loadImage(templateConfig.backgroundPath)
+    // Force exact dimensions regardless of image natural size
     ctx.drawImage(backgroundImage, 0, 0, 1920, 1920)
   } else {
     // Fill with white background if no background image
@@ -58,14 +67,29 @@ export async function renderTemplate(
     ctx.fillRect(0, 0, 1920, 1920)
   }
 
-  // 2. Draw user image with template positioning
+  // 2. Draw user image at template-defined position
   const userImage = await loadImage(croppedImageDataUrl)
   const pos = templateConfig.userImagePosition
+
+  console.log('Template Render Debug:', {
+    userImageDimensions: { width: userImage.width, height: userImage.height },
+    userImageNatural: { width: userImage.naturalWidth, height: userImage.naturalHeight },
+    positionConfig: pos,
+    canvasDimensions: { width: canvas.width, height: canvas.height }
+  })
+
+  // CRITICAL: Verify that the user image is exactly 1920x1080
+  if (userImage.width !== 1920 || userImage.height !== 1080) {
+    console.warn('⚠️ User image is not 1920x1080! This will cause rendering issues.', {
+      actual: { width: userImage.width, height: userImage.height },
+      expected: { width: 1920, height: 1080 }
+    })
+  }
 
   // Save canvas state for rotation
   ctx.save()
 
-  // Move to center of user image position and rotate if needed
+  // Apply rotation if specified
   if (pos.rotation && pos.rotation !== 0) {
     const centerX = pos.x + pos.width / 2
     const centerY = pos.y + pos.height / 2
@@ -74,23 +98,24 @@ export async function renderTemplate(
     ctx.translate(-centerX, -centerY)
   }
 
+  // Draw user image at exact position with exact dimensions
+  // CRITICAL: Always use the ENTIRE user image (which should be 1920x1080)
   ctx.drawImage(
     userImage,
-    pos.x,
-    pos.y,
-    pos.width,
-    pos.height
+    0, 0, userImage.width, userImage.height, // Source: entire user image
+    pos.x, pos.y, pos.width, pos.height      // Destination: template position
   )
 
   // Restore canvas state
   ctx.restore()
 
-  // 3. Draw foreground layer on top if it exists
+  // 3. Draw foreground layer on top (ALWAYS 1920x1920)
   if (templateConfig.foregroundPath) {
     const foregroundImage = await loadImage(templateConfig.foregroundPath)
+    // Force exact dimensions regardless of image natural size
     ctx.drawImage(foregroundImage, 0, 0, 1920, 1920)
   }
 
-  // Convert to JPEG data URL
-  return canvas.toDataURL('image/jpeg', 0.9)
+  // Convert to JPEG with high quality
+  return canvas.toDataURL('image/jpeg', 0.95)
 }

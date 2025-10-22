@@ -20,11 +20,11 @@ export default function Home() {
   const [isDOICompleted, setIsDOICompleted] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [crop, setCrop] = useState<Crop>({
-    unit: 'px',
-    width: 400,
-    height: 250,
-    x: 0,
-    y: 0
+    unit: '%',
+    width: 90,
+    height: 50.625, // 90 * (9/16) for 16:9 aspect
+    x: 5,
+    y: 24.6875 // Center vertically: (100 - 50.625) / 2
   })
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>()
   const imgRef = useRef<HTMLImageElement>(null)
@@ -114,24 +114,17 @@ export default function Home() {
         setError(null)
         setCurrentStep('crop')
         
-        // Initialize crop to 90% of photo width, vertically centered
+        // Initialize crop to 90% of photo, vertically centered
+        // CRITICAL: Use percentage units to be viewport-independent
         setTimeout(() => {
           if (imgRef.current) {
-            const { naturalWidth, naturalHeight } = imgRef.current
-            const targetAspect = 16 / 9 // Landscape aspect ratio
-
-            // Set crop to 90% of photo width
-            const cropWidth = naturalWidth * 0.9
-            const cropHeight = cropWidth / targetAspect
-            const x = (naturalWidth - cropWidth) / 2
-            const y = (naturalHeight - cropHeight) / 2
-
+            // Use percentage for viewport-independent cropping
             setCrop({
-              unit: 'px',
-              width: cropWidth,
-              height: cropHeight,
-              x: x,
-              y: y
+              unit: '%',
+              width: 90,
+              height: 90 * (9 / 16), // Maintain 16:9 aspect ratio
+              x: 5, // Center horizontally (5% from left)
+              y: (100 - (90 * (9 / 16))) / 2 // Center vertically
             })
           }
         }, 100)
@@ -145,7 +138,7 @@ export default function Home() {
   }
 
   const processCroppedImage = async () => {
-    if (!imgRef.current || !canvasRef.current || !completedCrop) {
+    if (!imgRef.current || !canvasRef.current || !crop) {
       setError('Bild oder Crop-Bereich nicht verfügbar')
       return
     }
@@ -171,25 +164,69 @@ export default function Home() {
       }).catch(err => console.error('Analytics error:', err))
 
       // Step 1: Crop the image to 1920x1080
+      // CRITICAL: Canvas must ALWAYS be exactly 1920x1080, regardless of viewport
       canvas.width = 1920
       canvas.height = 1080
 
-      const scaleX = image.naturalWidth / image.width
-      const scaleY = image.naturalHeight / image.height
+      // CRITICAL FIX: Convert crop coordinates to natural image coordinates
+      // Using percentage-based crop for viewport independence
+      const naturalWidth = image.naturalWidth
+      const naturalHeight = image.naturalHeight
 
+      let cropX, cropY, cropWidth, cropHeight
+
+      if (crop.unit === '%') {
+        // Percentage-based crop (viewport-independent!)
+        cropX = (crop.x / 100) * naturalWidth
+        cropY = (crop.y / 100) * naturalHeight
+        cropWidth = (crop.width / 100) * naturalWidth
+        cropHeight = (crop.height / 100) * naturalHeight
+      } else {
+        // Pixel-based crop (viewport-dependent, needs scaling)
+        const displayedWidth = image.clientWidth
+        const displayedHeight = image.clientHeight
+        const scaleX = naturalWidth / displayedWidth
+        const scaleY = naturalHeight / displayedHeight
+
+        cropX = crop.x * scaleX
+        cropY = crop.y * scaleY
+        cropWidth = crop.width * scaleX
+        cropHeight = crop.height * scaleY
+      }
+
+      console.log('Crop Debug:', {
+        cropUnit: crop.unit,
+        natural: { width: naturalWidth, height: naturalHeight },
+        displayed: { width: image.clientWidth, height: image.clientHeight },
+        cropInput: {
+          x: crop.x,
+          y: crop.y,
+          width: crop.width,
+          height: crop.height
+        },
+        cropNatural: {
+          x: cropX,
+          y: cropY,
+          width: cropWidth,
+          height: cropHeight
+        }
+      })
+
+      // Fill with black background
       ctx.fillStyle = '#000000'
       ctx.fillRect(0, 0, 1920, 1080)
 
+      // Draw the cropped portion using natural coordinates (viewport-independent!)
       ctx.drawImage(
         image,
-        completedCrop.x * scaleX,
-        completedCrop.y * scaleY,
-        completedCrop.width * scaleX,
-        completedCrop.height * scaleY,
-        0,
-        0,
-        1920,
-        1080
+        cropX,      // Source X (in natural image)
+        cropY,      // Source Y (in natural image)
+        cropWidth,  // Source Width (in natural image)
+        cropHeight, // Source Height (in natural image)
+        0,          // Destination X (canvas)
+        0,          // Destination Y (canvas)
+        1920,       // Destination Width (canvas)
+        1080        // Destination Height (canvas)
       )
 
       const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.9)
@@ -250,11 +287,11 @@ export default function Home() {
     setError(null)
     setAcceptedTerms(false)
     setCrop({
-      unit: 'px',
-      width: 400,
-      height: 250,
-      x: 0,
-      y: 0
+      unit: '%',
+      width: 90,
+      height: 50.625, // 90 * (9/16) for 16:9 aspect
+      x: 5,
+      y: 24.6875 // Center vertically: (100 - 50.625) / 2
     })
     setCompletedCrop(undefined)
     
@@ -445,7 +482,7 @@ export default function Home() {
               </button>
               <button
                 onClick={processCroppedImage}
-                disabled={isProcessing || !completedCrop}
+                disabled={isProcessing || !crop.width || !crop.height}
                 className="flex-1 bg-kn-blue text-white py-3 px-4 md:px-6 rounded-kn font-medium disabled:opacity-50 transition-colors text-sm md:text-base"
               >
                 {isProcessing ? '⏳ Verarbeite...' : '✅ Foto verwenden'}
