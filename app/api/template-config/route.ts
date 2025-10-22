@@ -5,17 +5,21 @@ export async function GET() {
   try {
     const template = await getRandomTemplate()
 
-    // Convert filesystem path to public URL path
+    // Convert filesystem paths to public URL paths
+    let publicBackgroundPath: string | undefined
+    if (template.backgroundPath) {
+      publicBackgroundPath = `/templates/${template.id}/background.png`
+    }
+
     let publicForegroundPath: string | undefined
     if (template.foregroundPath) {
-      // foregroundPath is like: /path/to/project/templates/1/foreground.png
-      // We need to convert it to: /templates/1/foreground.png (public URL)
       publicForegroundPath = `/templates/${template.id}/foreground.png`
     }
 
     return NextResponse.json({
       id: template.id,
       name: template.config.name,
+      backgroundPath: publicBackgroundPath,
       foregroundPath: publicForegroundPath,
       userImagePosition: template.config.userImagePosition
     })
