@@ -47,11 +47,17 @@ export async function renderTemplate(
     throw new Error('Could not get canvas context')
   }
 
-  // 1. Fill with white background
-  ctx.fillStyle = '#ffffff'
-  ctx.fillRect(0, 0, 1920, 1920)
+  // 1. Draw foreground layer first if it exists (as background)
+  if (templateConfig.foregroundPath) {
+    const foregroundImage = await loadImage(templateConfig.foregroundPath)
+    ctx.drawImage(foregroundImage, 0, 0, 1920, 1920)
+  } else {
+    // Fill with white background if no foreground
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, 1920, 1920)
+  }
 
-  // 2. Load and draw user image with template positioning
+  // 2. Draw user image with template positioning on top
   const userImage = await loadImage(croppedImageDataUrl)
   const pos = templateConfig.userImagePosition
 
@@ -77,12 +83,6 @@ export async function renderTemplate(
 
   // Restore canvas state
   ctx.restore()
-
-  // 3. Draw foreground layer if it exists
-  if (templateConfig.foregroundPath) {
-    const foregroundImage = await loadImage(templateConfig.foregroundPath)
-    ctx.drawImage(foregroundImage, 0, 0, 1920, 1920)
-  }
 
   // Convert to JPEG data URL
   return canvas.toDataURL('image/jpeg', 0.9)

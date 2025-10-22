@@ -82,26 +82,34 @@ strong, b {
   animation-delay: 0.5s;
 }
 
-@keyframes highlightPrize {
-  0%, 100% {
-    text-shadow: 0 0 8px rgba(79, 128, 255, 0.6);
-    transform: scale(1);
+@keyframes drawUnderline {
+  from {
+    width: 0;
   }
-  50% {
-    text-shadow: 0 0 20px rgba(79, 128, 255, 1), 0 0 30px rgba(79, 128, 255, 0.8);
-    transform: scale(1.08);
+  to {
+    width: 100%;
   }
 }
 
 .highlight-prize {
-  display: inline-block;
+  position: relative;
+  display: inline;
   color: #4F80FF;
-  text-decoration: underline;
-  text-decoration-color: #4F80FF;
-  text-decoration-thickness: 3px;
-  text-underline-offset: 4px;
-  animation: highlightPrize 1.5s ease-in-out infinite;
-  font-weight: 900;
+  font-weight: 700;
+  padding-bottom: 4px;
+}
+
+.highlight-prize::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent 0%, #4F80FF 5%, #4F80FF 95%, transparent 100%);
+  border-radius: 2px;
+  animation: drawUnderline 1.5s ease-out 0.5s forwards;
+  opacity: 0.7;
 }
 
 /* Mobile orientation hints */

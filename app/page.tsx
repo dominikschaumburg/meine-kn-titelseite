@@ -462,7 +462,7 @@ export default function Home() {
         {currentStep === 'preview' && capturedImage && (
           <div className="max-w-md mx-auto text-center space-y-4 w-full flex flex-col h-full justify-center">
             <h2 className="text-xl md:text-2xl font-bold text-kn-dark">
-              {isDOICompleted ? '🎉 Deine KN-Titelseite' : 'Deine KN-Titelseite'}
+              {isDOICompleted ? '🎉 Deine KN-Titelseite' : '🔎 Deine KN-Titelseite'}
             </h2>
 
             <div className="relative bg-white rounded-lg shadow-lg overflow-hidden select-none flex-shrink-0 w-full aspect-square max-w-md mx-auto">
@@ -496,10 +496,7 @@ export default function Home() {
             {!isDOICompleted ? (
               <div className="bg-yellow-50 border border-yellow-400 text-yellow-800 p-3 rounded-lg">
                 <p className="text-xs md:text-sm font-medium mb-1">
-                  🎁 📧 E-Mail bestätigen für scharfe Version
-                </p>
-                <p className="text-xs">
-                  Klicke auf den Button unten, um am Gewinnspiel teilzunehmen und das Bild freizuschalten.
+                  🎁 📧 Klicke auf den Button unten, um am Gewinnspiel teilzunehmen und deine personalisierte Titelseite in voller Auflösung zu erhalten.
                 </p>
               </div>
             ) : (
@@ -537,7 +534,7 @@ export default function Home() {
                       onClick={downloadImage}
                       className="flex-1 bg-kn-blue text-white py-3 px-4 rounded-kn font-medium transition-colors text-sm"
                     >
-                      💾 Download
+                      💾 Speichern
                     </button>
                     <button
                       onClick={shareImage}
@@ -548,9 +545,9 @@ export default function Home() {
                   </div>
                   <button
                     onClick={resetApp}
-                    className="w-full bg-gray-400 text-gray-700 py-2 px-4 rounded-kn font-medium transition-colors text-sm"
+                    className="w-full bg-kn-blue text-white py-2 px-4 rounded-kn font-medium transition-colors text-sm"
                   >
-                    🔄 Neues Foto erstellen
+                    🔄 Neue Titelseite erstellen
                   </button>
                 </>
               )}
@@ -610,7 +607,7 @@ export default function Home() {
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-kn-dark mb-2">🎁 Am Gewinnspiel teilnehmen & Titelseite freischalten</h3>
                   <p className="text-gray-700">
-                    Registriere dich für das Gewinnspiel und schalte deine persönliche Titelseite frei. Es gibt einen <strong className="highlight-prize">250 € Gutschein für den Holstein Kiel Fanshop</strong> zu gewinnen!
+                    Registriere dich für das Gewinnspiel und schalte deine persönliche Titelseite frei. Es gibt einen <strong className="highlight-prize">250 € Gutschein für den Holstein Kiel Fanshop im Stadion</strong> zu gewinnen!
                   </p>
                 </div>
               </div>
