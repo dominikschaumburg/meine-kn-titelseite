@@ -36,11 +36,9 @@ export default function OverloadPage() {
             Unser Server ist gerade überlastet. Zu viele KN-Fans wollen gleichzeitig ihre persönliche Titelseite erstellen.
           </p>
 
-          <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg">
-            <p className="text-sm">
-              <strong>💡 Kein Problem:</strong> Du kannst trotzdem am Gewinnspiel teilnehmen und später nochmal vorbeischauen!
-            </p>
-          </div>
+          <p className="text-base text-kn-dark/70">
+            Kein Problem: Du kannst trotzdem am Gewinnspiel teilnehmen und später nochmal vorbeischauen!
+          </p>
 
           <div className="flex flex-col space-y-3 w-full pt-4">
             <a
@@ -58,16 +56,6 @@ export default function OverloadPage() {
             >
               🔄 Nochmal versuchen
             </Link>
-          </div>
-
-          <p className="text-sm text-gray-600 pt-4">
-            Versuche es in ein paar Minuten erneut. Wir arbeiten daran, allen KN-Fans eine tolle Titelseite zu ermöglichen!
-          </p>
-
-          <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-lg mt-6">
-            <p className="text-xs">
-              <strong>ℹ️ Technischer Hinweis:</strong> Bei sehr hoher Auslastung ({'>'}90% Arbeitsspeicher oder {'>'}1000 Anfragen/Minute) zeigen wir vorübergehend diese Seite an.
-            </p>
           </div>
         </div>
       </main>
