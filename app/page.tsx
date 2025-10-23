@@ -39,17 +39,41 @@ export default function Home() {
       body: JSON.stringify({ event: 'pageView' })
     }).catch(err => console.error('Analytics error:', err))
 
-    // Check if there's an existing session
+    // Check if there's an existing session OR if we're returning from DOI
     if (typeof window !== 'undefined') {
+      // Check if we're returning from DOI completion
+      const urlParams = new URLSearchParams(window.location.search)
+      const doiParam = urlParams.get('doi_completed')
+
       const currentSession = KNStorage.getCurrentSession()
+
+      // If we have a session (from same tab OR shared localStorage), restore it
       if (currentSession) {
         setSessionId(currentSession.imageId)
         setCapturedImage(currentSession.imageData)
         setImageId(currentSession.imageId)
         setCurrentStep('preview')
 
-        // Check if DOI is already completed
-        setIsDOICompleted(KNStorage.isDOICompleted())
+        // Check DOI status immediately (important for new tab redirects)
+        const doiCompleted = KNStorage.isDOICompleted()
+        setIsDOICompleted(doiCompleted)
+
+        // If DOI was just completed via URL parameter, track it
+        if (doiParam && doiCompleted) {
+          fetch('/api/analytics', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event: 'doiCompletion' })
+          }).catch(err => console.error('Analytics error:', err))
+
+          console.log('✅ DOI completed and session restored!', {
+            sessionId: currentSession.imageId,
+            doiCompleted: doiCompleted
+          })
+        }
+      } else if (doiParam) {
+        // We have a DOI parameter but no session - this shouldn't happen
+        console.warn('⚠️ DOI completed but no session found in localStorage')
       }
     }
 
@@ -304,9 +328,20 @@ export default function Home() {
   const openRegistration = () => {
     // Mark registration start time
     KNStorage.markRegistrationStart()
-    
-    // Open registration page (no parameters needed)
-    window.open('https://aktion.kn-online.de/angebot/o7bl6', '_blank', 'width=800,height=600')
+
+    // Create callback URL with doi_completed parameter AND session_id
+    // This allows the new tab to restore the session
+    const doiTimestamp = Date.now()
+    const currentSessionId = sessionId || imageId
+    const callbackUrl = encodeURIComponent(
+      `${window.location.origin}?doi_completed=${doiTimestamp}&session_id=${currentSessionId}`
+    )
+
+    // Open registration page with callback URL
+    // The DOI system should redirect to this callback URL on success
+    const registrationUrl = `https://aktion.kn-online.de/angebot/o7bl6?callback=${callbackUrl}`
+
+    window.open(registrationUrl, '_blank', 'width=800,height=600')
   }
 
   const downloadImage = () => {
@@ -375,8 +410,7 @@ export default function Home() {
             </h1>
 
             <p className="text-lg text-kn-dark/80 mb-6">
-              Erstelle deine personalisierte Titelseite mit einem Selfie.
-              Halte dein Smartphone horizontal und mache ein Foto.
+              Erstelle deine personalisierte Titelseite und gewinne mit etwas Glück einen <br/><strong className="highlight-prize">250 € Gutschein für den Holstein-Fanshop im Stadion</strong>.
             </p>
 
             <button
@@ -519,7 +553,7 @@ export default function Home() {
                   alt="Generierte Titelseite"
                   width={400}
                   height={400}
-                  className={`w-full h-auto max-h-[40vh] md:max-h-none object-cover pointer-events-none ${!isDOICompleted ? 'preview-blur' : ''}`}
+                  className={`w-full h-auto object-contain pointer-events-none ${!isDOICompleted ? 'preview-blur' : ''}`}
                   draggable={false}
                 />
                 
@@ -539,11 +573,11 @@ export default function Home() {
             ) : (
               <div className="bg-green-50 border border-green-400 text-green-800 p-3 rounded-lg">
                 <p className="text-xs md:text-sm font-medium">
-                  ✅ Bild erfolgreich geschärft!
-                  Du kannst das Bild jetzt herunterladen oder teilen.
+                  ✅ Geschafft! Deine Titelseite ist freigeschaltet!
+                  Du kannst das Bild jetzt speichern und teilen.
                 </p>
                 <p className="text-xs mt-2">
-                  📱 Teile deine Titelseite gerne auf Social Media und markiere die <strong>@kielernachrichten</strong>!
+                📱 Wenn du magst, teile deine Titelseite gerne auf Social Media und markiere <strong>@kieler.nachrichten</strong>
                 </p>
               </div>
             )}
@@ -644,7 +678,7 @@ export default function Home() {
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-kn-dark mb-2">🎁 Am Gewinnspiel teilnehmen & Titelseite freischalten</h3>
                   <p className="text-gray-700">
-                    Registriere dich für das Gewinnspiel und schalte deine persönliche Titelseite frei. Es gibt einen <strong className="highlight-prize">250 € Gutschein für den Holstein Kiel Fanshop im Stadion</strong> zu gewinnen!
+                    Registriere dich für das Gewinnspiel und schalte deine persönliche Titelseite frei. Es gibt einen <strong className="highlight-prize">250 € Gutschein für den Holstein-Fanshop im Stadion</strong> zu gewinnen!
                   </p>
                 </div>
               </div>

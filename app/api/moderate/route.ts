@@ -26,8 +26,18 @@ async function trackModeration(flagged: boolean) {
 
 export async function POST(request: NextRequest) {
   // Initialize OpenAI-compatible client with litellm endpoint
+  const apiKey = process.env.LITELLM_API_KEY
+
+  if (!apiKey) {
+    console.error('LITELLM_API_KEY environment variable is not set')
+    return NextResponse.json(
+      { error: 'Moderation service is not configured' },
+      { status: 500 }
+    )
+  }
+
   const openai = new OpenAI({
-    apiKey: 'sk-9cRZIcMm7X8GhiMzsnidEQ',
+    apiKey: apiKey,
     baseURL: 'https://litellm.ki.rndtech.de/v1'
   })
 

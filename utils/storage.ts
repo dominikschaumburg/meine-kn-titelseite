@@ -219,8 +219,9 @@ if (typeof window !== 'undefined') {
       if (window.opener) {
         window.close()
       } else {
-        // Redirect back to main app
-        window.location.href = window.location.origin
+        // Redirect back to main app WITH doi_completed parameter
+        const doiTimestamp = Date.now()
+        window.location.href = `${window.location.origin}?doi_completed=${doiTimestamp}`
       }
     }, 1000)
   }

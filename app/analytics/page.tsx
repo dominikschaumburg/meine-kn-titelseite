@@ -72,7 +72,9 @@ export default function AnalyticsPage() {
 
     try {
       const response = await fetch('/api/analytics/reset', {
-        method: 'POST'
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
       })
 
       if (response.ok) {
