@@ -137,24 +137,24 @@ export default function Home() {
         setUploadedImage(result)
         setError(null)
         setCurrentStep('crop')
-        
-        // Initialize crop to 90% of photo, vertically centered
-        // CRITICAL: Use percentage units to be viewport-independent
-        setTimeout(() => {
-          if (imgRef.current) {
-            // Use percentage for viewport-independent cropping
-            setCrop({
-              unit: '%',
-              width: 90,
-              height: 90 * (9 / 16), // Maintain 16:9 aspect ratio
-              x: 5, // Center horizontally (5% from left)
-              y: (100 - (90 * (9 / 16))) / 2 // Center vertically
-            })
-          }
-        }, 100)
       }
     }
     reader.readAsDataURL(file)
+  }
+
+  // Handle image load to initialize crop
+  const handleImageLoad = () => {
+    if (imgRef.current) {
+      // Use percentage for viewport-independent cropping
+      // 16:9 aspect ratio enforced by ReactCrop component
+      setCrop({
+        unit: '%',
+        width: 90,
+        height: 90 * (9 / 16), // Maintain 16:9 aspect ratio
+        x: 5, // Center horizontally (5% from left)
+        y: (100 - (90 * (9 / 16))) / 2 // Center vertically
+      })
+    }
   }
 
   const triggerFileUpload = () => {
@@ -502,6 +502,7 @@ export default function Home() {
                     src={uploadedImage}
                     alt="Zu beschneidendes Bild"
                     className="max-w-full max-h-[50vh] object-contain"
+                    onLoad={handleImageLoad}
                   />
                 )}
               </ReactCrop>
