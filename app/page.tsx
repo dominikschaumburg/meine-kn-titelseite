@@ -137,14 +137,17 @@ export default function Home() {
   // Handle image load to initialize crop
   const handleImageLoad = () => {
     if (imgRef.current) {
-      // Use percentage for viewport-independent cropping
-      // 16:9 aspect ratio enforced by ReactCrop component
-      setCrop({
-        unit: '%',
-        width: 90,
-        height: 90 * (9 / 16), // Maintain 16:9 aspect ratio
-        x: 5, // Center horizontally (5% from left)
-        y: (100 - (90 * (9 / 16))) / 2 // Center vertically
+      // Use requestAnimationFrame to ensure the image is fully rendered
+      requestAnimationFrame(() => {
+        // Use percentage for viewport-independent cropping
+        // 16:9 aspect ratio enforced by ReactCrop component
+        setCrop({
+          unit: '%',
+          width: 90,
+          height: 90 * (9 / 16), // Maintain 16:9 aspect ratio
+          x: 5, // Center horizontally (5% from left)
+          y: (100 - (90 * (9 / 16))) / 2 // Center vertically
+        })
       })
     }
   }
@@ -318,14 +321,36 @@ export default function Home() {
     window.open(registrationUrl, '_blank', 'width=800,height=600')
   }
 
-  const downloadImage = () => {
+  const downloadImage = async () => {
     if (capturedImage && isDOICompleted) {
-      const link = document.createElement('a')
-      link.href = capturedImage
-      link.download = `kn-titelseite-${imageId || Date.now()}.jpg`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      // Detect iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+
+      if (isIOS && navigator.share) {
+        // On iOS, use the share API instead of download
+        try {
+          const response = await fetch(capturedImage)
+          const blob = await response.blob()
+          const file = new File([blob], `kn-titelseite-${imageId || Date.now()}.jpg`, { type: 'image/jpeg' })
+
+          await navigator.share({
+            files: [file],
+            title: 'Meine KN-Titelseite'
+          })
+        } catch (error) {
+          console.error('Share failed:', error)
+          // Fallback: open in new tab
+          window.open(capturedImage, '_blank')
+        }
+      } else {
+        // Desktop or Android: use standard download
+        const link = document.createElement('a')
+        link.href = capturedImage
+        link.download = `kn-titelseite-${imageId || Date.now()}.jpg`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      }
     }
   }
 
@@ -382,7 +407,7 @@ export default function Home() {
             </h1>
 
             <p className="text-lg text-kn-dark/80 mb-6">
-              Erstelle deine personalisierte Titelseite und gewinne mit etwas Glück einen <br/><strong className="highlight-prize">250 € Gutschein für den Holstein-Fanshop im Stadion</strong>.
+              Bring dein Selfie auf die KN-Titelseite und gewinne mit etwas Glück einen <br/><strong className="highlight-prize">250-€-Gutschein für den Holstein-Fanshop im Stadion</strong>.
             </p>
 
             <button
@@ -429,7 +454,7 @@ export default function Home() {
                 rel="noopener noreferrer"
                 className="w-full bg-kn-blue text-white py-4 px-6 rounded-kn text-lg font-medium text-center transition-colors block"
               >
-                🎁 Am Jubiläums-Gewinnspiel teilnehmen
+              Ich möchte nur am Gewinnspiel teilnehmen
               </a>
             </div>
 
@@ -455,7 +480,7 @@ export default function Home() {
 
             <div className="bg-blue-50 border border-blue-200 text-blue-800 p-2 rounded-lg mb-3">
               <p className="text-xs md:text-sm">
-                📏 Ziehe den Rahmen, um dein Foto im <strong>16:9 Querformat</strong> zuzuschneiden
+                📏 Ziehe den Rahmen, um dein Foto passend zuzuschneiden.
               </p>
             </div>
 
@@ -651,7 +676,7 @@ export default function Home() {
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-kn-dark mb-2">🎁 Gewinnspiel & Freischalten</h3>
                   <p className="text-gray-700">
-                    Registriere dich, bestätige deine E-Mail und schalte deine Titelseite frei. Gewinne <strong className="highlight-prize">250 € für den Holstein-Fanshop!</strong>
+                    Registriere dich, bestätige deine E-Mail und schalte deine Titelseite frei. Gewinne <strong className="highlight-prize">250-€-Gutschein für den Holstein-Fanshop!</strong>
                   </p>
                 </div>
               </div>
@@ -671,6 +696,11 @@ export default function Home() {
             </div>
 
             <div className="mt-8 pt-6 border-t border-gray-200">
+              <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-lg mb-4">
+                <p className="text-sm">
+                  <strong>🔒 Deine Privatsphäre ist geschützt:</strong> Alle Fotos werden direkt auf deinem Gerät verarbeitet und erstellt. Nichts wird auf unseren Servern gespeichert oder veröffentlicht.
+                </p>
+              </div>
               <button
                 onClick={() => setShowOnboarding(false)}
                 className="w-full bg-kn-blue text-white py-3 px-6 rounded-kn text-lg font-medium transition-colors"
