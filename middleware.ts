@@ -2,25 +2,15 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 // Configuration for overload protection
-const MAX_MEMORY_PERCENT = 90 // Trigger overload at 90% memory usage
-const MAX_REQUESTS_PER_MINUTE = 1000 // Max requests per minute before triggering overload
+// Note: Memory monitoring is done in API routes, not in Edge Runtime middleware
+const MAX_REQUESTS_PER_MINUTE = parseInt(process.env.MAX_REQUESTS_PER_MINUTE || '1000')
 
 // Simple in-memory request counter (resets on server restart)
 let requestCounts: { [key: string]: number } = {}
 let lastReset = Date.now()
 
 function checkServerLoad(): { isOverloaded: boolean; reason?: string } {
-  // Check memory usage (if available)
-  if (typeof process !== 'undefined' && process.memoryUsage) {
-    const memUsage = process.memoryUsage()
-    const memPercent = (memUsage.heapUsed / memUsage.heapTotal) * 100
-
-    if (memPercent > MAX_MEMORY_PERCENT) {
-      return { isOverloaded: true, reason: 'High memory usage' }
-    }
-  }
-
-  // Check request rate
+  // Check request rate (Edge Runtime compatible)
   const now = Date.now()
   const minuteKey = Math.floor(now / 60000).toString()
 

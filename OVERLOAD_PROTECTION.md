@@ -4,10 +4,16 @@ Diese Anwendung verfügt über einen integrierten Überlastungsschutz, der autom
 
 ## Wie es funktioniert
 
-Das Middleware (`middleware.ts`) überwacht:
+### 1. Request-Rate Monitoring (Middleware)
+Das Middleware (`middleware.ts`) überwacht die **Request-Rate** in Echtzeit:
+- Bei >1000 Anfragen pro Minute wird automatisch auf `/overload` umgeleitet
+- Läuft im Edge Runtime (schnell und effizient)
 
-1. **Arbeitsspeicher-Auslastung**: Bei >90% Heap-Auslastung
-2. **Request-Rate**: Bei >1000 Anfragen pro Minute
+### 2. Memory Monitoring (Health Check API)
+Die Health-Check API (`/api/health`) überwacht die **Arbeitsspeicher-Auslastung**:
+- Bei >90% Heap-Auslastung gibt die API HTTP 503 zurück
+- Läuft im Node.js Runtime (voller Zugriff auf Memory-Daten)
+- Kann von Load Balancern für Health Checks verwendet werden
 
 Wenn eine dieser Schwellenwerte überschritten wird:
 - API-Requests erhalten HTTP 503 (Service Unavailable) mit `Retry-After: 60` Header
@@ -28,20 +34,34 @@ MAX_REQUESTS_PER_MINUTE=1000   # Standard: 1000 Anfragen/Minute
 
 ### Anpassung im Code
 
-Bearbeiten Sie `middleware.ts`:
+Bearbeiten Sie `middleware.ts` für Request-Rate:
+
+```typescript
+const MAX_REQUESTS_PER_MINUTE = 1000  // Anfragen
+```
+
+Bearbeiten Sie `app/api/health/route.ts` für Memory-Threshold:
 
 ```typescript
 const MAX_MEMORY_PERCENT = 90  // Prozent
-const MAX_REQUESTS_PER_MINUTE = 1000  // Anfragen
 ```
 
 ## Testing
 
 ### Lokales Testen
 
-1. Besuchen Sie direkt: `http://localhost:3000/overload`
+1. **Overload-Seite direkt testen:**
+   ```
+   http://localhost:3000/overload
+   ```
 
-2. Simulieren Sie Überlastung (temporär `MAX_REQUESTS_PER_MINUTE` auf `1` setzen):
+2. **Health-Check API testen:**
+   ```bash
+   curl http://localhost:3000/api/health
+   # Sollte Memory-Usage und Status zurückgeben
+   ```
+
+3. **Simulieren Sie Überlastung** (temporär `MAX_REQUESTS_PER_MINUTE` auf `1` setzen):
 
 ```typescript
 // In middleware.ts
