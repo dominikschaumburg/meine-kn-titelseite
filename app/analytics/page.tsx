@@ -159,99 +159,99 @@ export default function AnalyticsPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <div className="flex-1 py-8 px-4">
+      <div className="flex-1 py-4 md:py-8 px-3 md:px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="flex justify-between items-center mb-4">
-            <Link href="/" className="text-kn-blue hover:underline">
-              ← Zurück zur Hauptseite
+          <div className="flex justify-between items-center mb-3 md:mb-4">
+            <Link href="/" className="text-kn-blue hover:underline text-sm md:text-base">
+              ← Zurück
             </Link>
             <button
               onClick={handleReset}
-              className="bg-kn-red text-white py-2 px-4 rounded-kn font-medium text-sm transition-colors"
+              className="bg-kn-red text-white py-1.5 px-3 md:py-2 md:px-4 rounded-kn font-medium text-xs md:text-sm transition-colors"
             >
-              Statistiken zurücksetzen
+              Reset
             </button>
           </div>
 
-          <h1 className="text-3xl font-bold text-kn-dark mb-8">Analytics Dashboard</h1>
+          <h1 className="text-xl md:text-3xl font-bold text-kn-dark mb-4 md:mb-8">Analytics</h1>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-blue-50 rounded-lg p-6 border-2 border-kn-blue">
-              <h2 className="text-sm font-semibold text-kn-dark mb-2 uppercase">Seitenaufrufe</h2>
-              <p className="text-4xl font-bold text-kn-blue">{analytics.pageViews.toLocaleString()}</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6 mb-4 md:mb-8">
+            <div className="bg-blue-50 rounded-lg p-3 md:p-6 border-2 border-kn-blue">
+              <h2 className="text-xs md:text-sm font-semibold text-kn-dark mb-1 md:mb-2 uppercase">Seitenaufrufe</h2>
+              <p className="text-2xl md:text-4xl font-bold text-kn-blue">{analytics.pageViews.toLocaleString()}</p>
             </div>
 
-            <div className="bg-green-50 rounded-lg p-6 border-2 border-kn-green">
-              <h2 className="text-sm font-semibold text-kn-dark mb-2 uppercase">Foto Uploads</h2>
-              <p className="text-4xl font-bold text-kn-green">{analytics.photoUploads.toLocaleString()}</p>
-              <p className="text-sm text-gray-600 mt-2">Conversion: {conversionRate}%</p>
+            <div className="bg-green-50 rounded-lg p-3 md:p-6 border-2 border-kn-green">
+              <h2 className="text-xs md:text-sm font-semibold text-kn-dark mb-1 md:mb-2 uppercase">Foto Uploads</h2>
+              <p className="text-2xl md:text-4xl font-bold text-kn-green">{analytics.photoUploads.toLocaleString()}</p>
+              <p className="text-xs md:text-sm text-gray-600 mt-1 md:mt-2">Conv: {conversionRate}%</p>
             </div>
 
-            <div className="bg-purple-50 rounded-lg p-6 border-2 border-purple-600">
-              <h2 className="text-sm font-semibold text-kn-dark mb-2 uppercase">DOI Abschlüsse</h2>
-              <p className="text-4xl font-bold text-purple-600">{analytics.doiCompletions.toLocaleString()}</p>
-              <p className="text-sm text-gray-600 mt-2">Completion: {completionRate}%</p>
+            <div className="bg-purple-50 rounded-lg p-3 md:p-6 border-2 border-purple-600">
+              <h2 className="text-xs md:text-sm font-semibold text-kn-dark mb-1 md:mb-2 uppercase">DOI Abschlüsse</h2>
+              <p className="text-2xl md:text-4xl font-bold text-purple-600">{analytics.doiCompletions.toLocaleString()}</p>
+              <p className="text-xs md:text-sm text-gray-600 mt-1 md:mt-2">Compl: {completionRate}%</p>
             </div>
           </div>
 
-          <div className="bg-gray-50 rounded-lg p-6 mb-8">
-            <h2 className="text-xl font-bold text-kn-dark mb-4">Moderation</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-green-100 rounded-lg p-4 border-2 border-green-600">
-                <h3 className="text-sm font-semibold text-kn-dark mb-2 uppercase">Bestanden</h3>
-                <p className="text-3xl font-bold text-green-600">{moderationPassed.toLocaleString()}</p>
-                <p className="text-sm text-gray-600 mt-2">{moderationPassRate}% der moderierten Fotos</p>
+          <div className="bg-gray-50 rounded-lg p-3 md:p-6 mb-4 md:mb-8">
+            <h2 className="text-base md:text-xl font-bold text-kn-dark mb-3 md:mb-4">Moderation</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+              <div className="bg-green-100 rounded-lg p-3 md:p-4 border-2 border-green-600">
+                <h3 className="text-xs md:text-sm font-semibold text-kn-dark mb-1 md:mb-2 uppercase">Bestanden</h3>
+                <p className="text-xl md:text-3xl font-bold text-green-600">{moderationPassed.toLocaleString()}</p>
+                <p className="text-xs md:text-sm text-gray-600 mt-1 md:mt-2">{moderationPassRate}%</p>
               </div>
 
-              <div className="bg-red-100 rounded-lg p-4 border-2 border-kn-red">
-                <h3 className="text-sm font-semibold text-kn-dark mb-2 uppercase">Geflaggt</h3>
-                <p className="text-3xl font-bold text-kn-red">{moderationFlagged.toLocaleString()}</p>
-                <p className="text-sm text-gray-600 mt-2">{moderationFlagRate}% der moderierten Fotos</p>
+              <div className="bg-red-100 rounded-lg p-3 md:p-4 border-2 border-kn-red">
+                <h3 className="text-xs md:text-sm font-semibold text-kn-dark mb-1 md:mb-2 uppercase">Geflaggt</h3>
+                <p className="text-xl md:text-3xl font-bold text-kn-red">{moderationFlagged.toLocaleString()}</p>
+                <p className="text-xs md:text-sm text-gray-600 mt-1 md:mt-2">{moderationFlagRate}%</p>
               </div>
             </div>
-            <p className="text-sm text-gray-600 mt-4">
-              Gesamt moderierte Fotos: {totalModerated.toLocaleString()}
+            <p className="text-xs md:text-sm text-gray-600 mt-2 md:mt-4">
+              Gesamt: {totalModerated.toLocaleString()}
             </p>
           </div>
 
-          <div className="bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-bold text-kn-dark mb-4">Funnel-Übersicht</h2>
-            <div className="space-y-4">
+          <div className="bg-gray-50 rounded-lg p-3 md:p-6">
+            <h2 className="text-base md:text-xl font-bold text-kn-dark mb-3 md:mb-4">Funnel</h2>
+            <div className="space-y-3 md:space-y-4">
               <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-semibold">1. Seitenaufruf</span>
-                  <span className="text-sm">{analytics.pageViews} (100%)</span>
+                <div className="flex justify-between mb-1 md:mb-2">
+                  <span className="text-xs md:text-sm font-semibold">1. Seitenaufruf</span>
+                  <span className="text-xs md:text-sm">{analytics.pageViews} (100%)</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-4">
-                  <div className="bg-kn-blue h-4 rounded-full" style={{ width: '100%' }}></div>
+                <div className="w-full bg-gray-200 rounded-full h-3 md:h-4">
+                  <div className="bg-kn-blue h-3 md:h-4 rounded-full" style={{ width: '100%' }}></div>
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-semibold">2. Foto Upload</span>
-                  <span className="text-sm">{analytics.photoUploads} ({conversionRate}%)</span>
+                <div className="flex justify-between mb-1 md:mb-2">
+                  <span className="text-xs md:text-sm font-semibold">2. Foto Upload</span>
+                  <span className="text-xs md:text-sm">{analytics.photoUploads} ({conversionRate}%)</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-4">
-                  <div className="bg-kn-green h-4 rounded-full" style={{ width: `${conversionRate}%` }}></div>
+                <div className="w-full bg-gray-200 rounded-full h-3 md:h-4">
+                  <div className="bg-kn-green h-3 md:h-4 rounded-full" style={{ width: `${conversionRate}%` }}></div>
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm font-semibold">3. DOI Abschluss</span>
-                  <span className="text-sm">{analytics.doiCompletions} ({completionRate}%)</span>
+                <div className="flex justify-between mb-1 md:mb-2">
+                  <span className="text-xs md:text-sm font-semibold">3. DOI Abschluss</span>
+                  <span className="text-xs md:text-sm">{analytics.doiCompletions} ({completionRate}%)</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-4">
-                  <div className="bg-purple-600 h-4 rounded-full" style={{ width: `${completionRate}%` }}></div>
+                <div className="w-full bg-gray-200 rounded-full h-3 md:h-4">
+                  <div className="bg-purple-600 h-3 md:h-4 rounded-full" style={{ width: `${completionRate}%` }}></div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="mt-6 text-sm text-gray-600">
-            <p>Letzte Aktualisierung: {new Date(analytics.lastUpdated).toLocaleString('de-DE')}</p>
-            <p className="mt-2">Diese Seite aktualisiert sich automatisch alle 10 Sekunden.</p>
+          <div className="mt-3 md:mt-6 text-xs md:text-sm text-gray-600">
+            <p>Update: {new Date(analytics.lastUpdated).toLocaleString('de-DE')}</p>
+            <p className="mt-1 md:mt-2">Auto-refresh alle 10 Sek.</p>
           </div>
         </div>
       </div>
