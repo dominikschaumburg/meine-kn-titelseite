@@ -175,38 +175,38 @@ export default function AnalyticsPage() {
 
           <h1 className="text-xl md:text-3xl font-bold text-kn-dark mb-4 md:mb-8">Analytics</h1>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6 mb-4 md:mb-8">
-            <div className="bg-blue-50 rounded-lg p-3 md:p-6 border-2 border-kn-blue">
-              <h2 className="text-xs md:text-sm font-semibold text-kn-dark mb-1 md:mb-2 uppercase">Seitenaufrufe</h2>
-              <p className="text-2xl md:text-4xl font-bold text-kn-blue">{analytics.pageViews.toLocaleString()}</p>
+          <div className="grid grid-cols-3 gap-2 md:gap-4 mb-4 md:mb-8">
+            <div className="bg-red-50 rounded-lg p-2 md:p-4 border-2 border-red-500">
+              <h2 className="text-xs md:text-sm font-semibold text-kn-dark mb-1 uppercase">Aufrufe</h2>
+              <p className="text-xl md:text-3xl font-bold text-red-500">{analytics.pageViews.toLocaleString()}</p>
             </div>
 
-            <div className="bg-green-50 rounded-lg p-3 md:p-6 border-2 border-kn-green">
-              <h2 className="text-xs md:text-sm font-semibold text-kn-dark mb-1 md:mb-2 uppercase">Foto Uploads</h2>
-              <p className="text-2xl md:text-4xl font-bold text-kn-green">{analytics.photoUploads.toLocaleString()}</p>
-              <p className="text-xs md:text-sm text-gray-600 mt-1 md:mt-2">Conv: {conversionRate}%</p>
+            <div className="bg-orange-50 rounded-lg p-2 md:p-4 border-2 border-orange-500">
+              <h2 className="text-xs md:text-sm font-semibold text-kn-dark mb-1 uppercase">Uploads</h2>
+              <p className="text-xl md:text-3xl font-bold text-orange-500">{analytics.photoUploads.toLocaleString()}</p>
+              <p className="text-xs text-gray-600 mt-1">{conversionRate}%</p>
             </div>
 
-            <div className="bg-purple-50 rounded-lg p-3 md:p-6 border-2 border-purple-600">
-              <h2 className="text-xs md:text-sm font-semibold text-kn-dark mb-1 md:mb-2 uppercase">DOI Abschlüsse</h2>
-              <p className="text-2xl md:text-4xl font-bold text-purple-600">{analytics.doiCompletions.toLocaleString()}</p>
-              <p className="text-xs md:text-sm text-gray-600 mt-1 md:mt-2">Compl: {completionRate}%</p>
+            <div className="bg-green-50 rounded-lg p-2 md:p-4 border-2 border-green-600">
+              <h2 className="text-xs md:text-sm font-semibold text-kn-dark mb-1 uppercase">DOI</h2>
+              <p className="text-xl md:text-3xl font-bold text-green-600">{analytics.doiCompletions.toLocaleString()}</p>
+              <p className="text-xs text-gray-600 mt-1">{completionRate}%</p>
             </div>
           </div>
 
           <div className="bg-gray-50 rounded-lg p-3 md:p-6 mb-4 md:mb-8">
             <h2 className="text-base md:text-xl font-bold text-kn-dark mb-3 md:mb-4">Moderation</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
-              <div className="bg-green-100 rounded-lg p-3 md:p-4 border-2 border-green-600">
-                <h3 className="text-xs md:text-sm font-semibold text-kn-dark mb-1 md:mb-2 uppercase">Bestanden</h3>
+            <div className="grid grid-cols-2 gap-2 md:gap-4">
+              <div className="bg-green-100 rounded-lg p-2 md:p-4 border-2 border-green-600">
+                <h3 className="text-xs md:text-sm font-semibold text-kn-dark mb-1 uppercase">Bestanden</h3>
                 <p className="text-xl md:text-3xl font-bold text-green-600">{moderationPassed.toLocaleString()}</p>
-                <p className="text-xs md:text-sm text-gray-600 mt-1 md:mt-2">{moderationPassRate}%</p>
+                <p className="text-xs text-gray-600 mt-1">{moderationPassRate}%</p>
               </div>
 
-              <div className="bg-red-100 rounded-lg p-3 md:p-4 border-2 border-kn-red">
-                <h3 className="text-xs md:text-sm font-semibold text-kn-dark mb-1 md:mb-2 uppercase">Geflaggt</h3>
+              <div className="bg-red-100 rounded-lg p-2 md:p-4 border-2 border-kn-red">
+                <h3 className="text-xs md:text-sm font-semibold text-kn-dark mb-1 uppercase">Geflaggt</h3>
                 <p className="text-xl md:text-3xl font-bold text-kn-red">{moderationFlagged.toLocaleString()}</p>
-                <p className="text-xs md:text-sm text-gray-600 mt-1 md:mt-2">{moderationFlagRate}%</p>
+                <p className="text-xs text-gray-600 mt-1">{moderationFlagRate}%</p>
               </div>
             </div>
             <p className="text-xs md:text-sm text-gray-600 mt-2 md:mt-4">
@@ -223,7 +223,7 @@ export default function AnalyticsPage() {
                   <span className="text-xs md:text-sm">{analytics.pageViews} (100%)</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3 md:h-4">
-                  <div className="bg-kn-blue h-3 md:h-4 rounded-full" style={{ width: '100%' }}></div>
+                  <div className="bg-red-500 h-3 md:h-4 rounded-full" style={{ width: '100%' }}></div>
                 </div>
               </div>
 
@@ -233,7 +233,7 @@ export default function AnalyticsPage() {
                   <span className="text-xs md:text-sm">{analytics.photoUploads} ({conversionRate}%)</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3 md:h-4">
-                  <div className="bg-kn-green h-3 md:h-4 rounded-full" style={{ width: `${conversionRate}%` }}></div>
+                  <div className="bg-orange-500 h-3 md:h-4 rounded-full" style={{ width: `${conversionRate}%` }}></div>
                 </div>
               </div>
 
@@ -243,7 +243,7 @@ export default function AnalyticsPage() {
                   <span className="text-xs md:text-sm">{analytics.doiCompletions} ({completionRate}%)</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3 md:h-4">
-                  <div className="bg-purple-600 h-3 md:h-4 rounded-full" style={{ width: `${completionRate}%` }}></div>
+                  <div className="bg-green-600 h-3 md:h-4 rounded-full" style={{ width: `${completionRate}%` }}></div>
                 </div>
               </div>
             </div>
