@@ -698,7 +698,7 @@ export default function Home() {
             <div className="mt-8 pt-6 border-t border-gray-200">
               <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-lg mb-4">
                 <p className="text-sm">
-                  <strong>🔒 Deine Privatsphäre ist geschützt:</strong> Alle Fotos werden direkt auf deinem Gerät verarbeitet und erstellt. Nichts wird auf unseren Servern gespeichert oder veröffentlicht.
+                  <strong>🔒 Privat & sicher:</strong> Fotos bleiben auf deinem Gerät. Keine Speicherung, keine Veröffentlichung.
                 </p>
               </div>
               <button
