@@ -66,7 +66,7 @@ export default function OverloadPage() {
 
           <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-lg mt-6">
             <p className="text-xs">
-              <strong>ℹ️ Technischer Hinweis:</strong> Bei sehr hoher Auslastung (>90% Arbeitsspeicher oder >1000 Anfragen/Minute) zeigen wir vorübergehend diese Seite an.
+              <strong>ℹ️ Technischer Hinweis:</strong> Bei sehr hoher Auslastung ({'>'}90% Arbeitsspeicher oder {'>'}1000 Anfragen/Minute) zeigen wir vorübergehend diese Seite an.
             </p>
           </div>
         </div>
