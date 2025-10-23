@@ -82,37 +82,11 @@ strong, b {
   animation-delay: 0.5s;
 }
 
-@keyframes subtleHighlight {
-  from {
-    opacity: 0;
-    transform: scaleX(0);
-  }
-  to {
-    opacity: 0.15;
-    transform: scaleX(1);
-  }
-}
-
 .highlight-prize {
-  position: relative;
-  display: inline;
   color: #4F80FF;
   font-weight: 700;
-}
-
-.highlight-prize::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -2px;
-  width: 100%;
-  height: 100%;
-  background-color: #4F80FF;
-  transform-origin: left;
-  animation: subtleHighlight 1.2s ease-out 0.3s forwards;
-  opacity: 0;
-  z-index: -1;
-  border-radius: 2px;
+  animation: pulseOnce 2s ease-in-out 1;
+  animation-delay: 0.5s;
 }
 
 /* Mobile orientation hints */
