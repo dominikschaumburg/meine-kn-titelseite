@@ -32,7 +32,6 @@ export class KNStorage {
       // Save current session
       localStorage.setItem(`${this.PREFIX}current_session`, JSON.stringify(session))
       localStorage.setItem(`${this.PREFIX}current_session_id`, sessionId)
-      console.log('Current session saved:', sessionId)
       return sessionId
     } catch (error) {
       console.error('Failed to save current session:', error)
@@ -72,7 +71,6 @@ export class KNStorage {
       if (currentSession) {
         currentSession.registrationStartTime = Date.now()
         localStorage.setItem(`${this.PREFIX}current_session`, JSON.stringify(currentSession))
-        console.log('Registration start time marked')
       }
     } catch (error) {
       console.error('Failed to mark registration start:', error)
@@ -130,7 +128,6 @@ export class KNStorage {
     
     try {
       localStorage.setItem(`${this.PREFIX}doi_completed`, Date.now().toString())
-      console.log('DOI marked as completed at:', new Date().toISOString())
     } catch (error) {
       console.error('Failed to mark DOI completed:', error)
     }
@@ -143,7 +140,6 @@ export class KNStorage {
     try {
       localStorage.removeItem(`${this.PREFIX}current_session`)
       localStorage.removeItem(`${this.PREFIX}current_session_id`)
-      console.log('Current session removed')
     } catch (error) {
       console.error('Failed to remove current session:', error)
     }
@@ -170,7 +166,6 @@ export class KNStorage {
           const timestamp = parseInt(localStorage.getItem(key) || '0')
           if (now - timestamp > this.SESSION_DURATION) {
             localStorage.removeItem(key)
-            console.log('Cleaned up expired DOI flag:', key)
           }
         }
       })
@@ -210,7 +205,7 @@ if (typeof window !== 'undefined') {
       try {
         window.opener.postMessage({ type: 'KN_DOI_COMPLETED' }, '*')
       } catch (error) {
-        console.log('Could not notify parent window')
+        // Silent fail - parent window notification failed
       }
     }
     

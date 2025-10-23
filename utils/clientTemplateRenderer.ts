@@ -71,21 +71,6 @@ export async function renderTemplate(
   const userImage = await loadImage(croppedImageDataUrl)
   const pos = templateConfig.userImagePosition
 
-  console.log('Template Render Debug:', {
-    userImageDimensions: { width: userImage.width, height: userImage.height },
-    userImageNatural: { width: userImage.naturalWidth, height: userImage.naturalHeight },
-    positionConfig: pos,
-    canvasDimensions: { width: canvas.width, height: canvas.height }
-  })
-
-  // CRITICAL: Verify that the user image is exactly 1920x1080
-  if (userImage.width !== 1920 || userImage.height !== 1080) {
-    console.warn('⚠️ User image is not 1920x1080! This will cause rendering issues.', {
-      actual: { width: userImage.width, height: userImage.height },
-      expected: { width: 1920, height: 1080 }
-    })
-  }
-
   // Save canvas state for rotation
   ctx.save()
 

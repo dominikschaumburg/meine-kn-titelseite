@@ -65,15 +65,7 @@ export default function Home() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ event: 'doiCompletion' })
           }).catch(err => console.error('Analytics error:', err))
-
-          console.log('✅ DOI completed and session restored!', {
-            sessionId: currentSession.imageId,
-            doiCompleted: doiCompleted
-          })
         }
-      } else if (doiParam) {
-        // We have a DOI parameter but no session - this shouldn't happen
-        console.warn('⚠️ DOI completed but no session found in localStorage')
       }
     }
 
@@ -218,24 +210,6 @@ export default function Home() {
         cropHeight = crop.height * scaleY
       }
 
-      console.log('Crop Debug:', {
-        cropUnit: crop.unit,
-        natural: { width: naturalWidth, height: naturalHeight },
-        displayed: { width: image.clientWidth, height: image.clientHeight },
-        cropInput: {
-          x: crop.x,
-          y: crop.y,
-          width: crop.width,
-          height: crop.height
-        },
-        cropNatural: {
-          x: cropX,
-          y: cropY,
-          width: cropWidth,
-          height: cropHeight
-        }
-      })
-
       // Fill with black background
       ctx.fillStyle = '#000000'
       ctx.fillRect(0, 0, 1920, 1080)
@@ -368,8 +342,6 @@ export default function Home() {
         })
       } catch (error) {
         console.error('Sharing failed:', error)
-        // Fallback: silent fail
-        console.log('Sharing not supported or failed')
       }
     }
   }
@@ -574,7 +546,7 @@ export default function Home() {
             ) : (
               <div className="bg-green-50 border border-green-400 text-green-800 p-3 rounded-lg">
                 <p className="text-xs md:text-sm font-medium">
-                  ✅ Geschafft! Deine Titelseite ist freigeschaltet!
+                  ✅ Geschafft! Deine Titelseite ist freigeschaltet! <br/>
                   Du kannst das Bild jetzt speichern und teilen.
                 </p>
                 <p className="text-xs mt-2">
@@ -653,7 +625,7 @@ export default function Home() {
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-kn-dark mb-2">📸 Foto aufnehmen</h3>
                   <p className="text-gray-700">
-                    Nimm ein Selfie auf oder wähle ein bestehendes Foto aus. Halte dein Smartphone am besten im Querformat für das beste Ergebnis.
+                    Nimm ein Selfie auf. Halte dein Smartphone am besten im Querformat.
                   </p>
                 </div>
               </div>
@@ -666,7 +638,7 @@ export default function Home() {
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-kn-dark mb-2">✂️ Foto zuschneiden</h3>
                   <p className="text-gray-700">
-                    Passe den Bildausschnitt an, um den perfekten Bereich für deine Titelseite auszuwählen.
+                    Passe den Bildausschnitt an.
                   </p>
                 </div>
               </div>
@@ -677,9 +649,9 @@ export default function Home() {
                   3
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-kn-dark mb-2">🎁 Am Gewinnspiel teilnehmen & Titelseite freischalten</h3>
+                  <h3 className="text-xl font-bold text-kn-dark mb-2">🎁 Gewinnspiel & Freischalten</h3>
                   <p className="text-gray-700">
-                    Registriere dich für das Gewinnspiel und schalte deine persönliche Titelseite frei. Es gibt einen <strong className="highlight-prize">250 € Gutschein für den Holstein-Fanshop im Stadion</strong> zu gewinnen!
+                    Registriere dich, bestätige deine E-Mail und schalte deine Titelseite frei. Gewinne <strong className="highlight-prize">250 € für den Holstein-Fanshop!</strong>
                   </p>
                 </div>
               </div>
@@ -690,9 +662,9 @@ export default function Home() {
                   4
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-kn-dark mb-2">💾 Herunterladen & Teilen</h3>
+                  <h3 className="text-xl font-bold text-kn-dark mb-2">💾 Speichern & Teilen</h3>
                   <p className="text-gray-700">
-                    Lade deine digitale Titelseite herunter und teile sie mit deinen Freunden! Wer mag, kann die Kieler Nachrichten auf Social Media markieren.
+                  Speichere und teile deine Titelseite.
                   </p>
                 </div>
               </div>
