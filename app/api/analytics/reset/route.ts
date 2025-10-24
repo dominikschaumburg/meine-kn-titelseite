@@ -20,6 +20,10 @@ export async function POST(request: NextRequest) {
       doiCompletions: 0,
       moderationPassed: 0,
       moderationFlagged: 0,
+      howItWorksClicks: 0,
+      directContestClicks: 0,
+      imageDownloads: 0,
+      imageShares: 0,
       lastUpdated: new Date().toISOString()
     }
 
