@@ -8,6 +8,17 @@ export const metadata: Metadata = {
   authors: [{ name: 'Kieler Nachrichten' }],
   applicationName: 'Meine KN-Titelseite',
   metadataBase: new URL('https://kn.meine-titelseite.de'),
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   other: {
     'mobile-web-app-capable': 'yes'
   },
