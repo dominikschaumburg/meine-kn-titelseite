@@ -19,12 +19,13 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null)
   const [isDOICompleted, setIsDOICompleted] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [templateAspect, setTemplateAspect] = useState<number>(1.75) // Default to template aspect ratio
   const [crop, setCrop] = useState<Crop>({
     unit: '%',
     width: 90,
-    height: 90 * (9 / 16), // 16:9 aspect ratio: 90 * (9/16) = 50.625
+    height: 90 / 1.75, // Template aspect ratio: 1232.8 / 704.4 = 1.75
     x: 5,
-    y: (100 - (90 * (9 / 16))) / 2 // Center vertically
+    y: (100 - (90 / 1.75)) / 2 // Center vertically
   })
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>()
   const imgRef = useRef<HTMLImageElement>(null)
@@ -32,6 +33,21 @@ export default function Home() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   
   useEffect(() => {
+    // Load template config to get the correct aspect ratio
+    const loadTemplateConfig = async () => {
+      try {
+        const response = await fetch('/api/template-config')
+        const config: TemplateConfig = await response.json()
+        const aspect = config.userImagePosition.width / config.userImagePosition.height
+        setTemplateAspect(aspect)
+      } catch (err) {
+        console.error('Failed to load template config:', err)
+        // Keep default 1.75 aspect ratio
+      }
+    }
+
+    loadTemplateConfig()
+
     // Track page view
     fetch('/api/analytics', {
       method: 'POST',
@@ -138,20 +154,19 @@ export default function Home() {
   const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.currentTarget
     if (img && img.naturalWidth && img.naturalHeight) {
-      // Calculate crop dimensions based on image aspect ratio
-      // Target is 16:9 aspect ratio (1920x1080)
+      // Calculate crop dimensions based on image aspect ratio vs template aspect ratio
       const imageAspect = img.naturalWidth / img.naturalHeight
-      const targetAspect = 16 / 9
+      const targetAspect = templateAspect // Use template aspect ratio from config
 
       let cropWidth = 90
       let cropHeight = 90
 
       if (imageAspect > targetAspect) {
-        // Image is wider than 16:9, constrain by height
+        // Image is wider than template, constrain by height
         cropHeight = 90
         cropWidth = (targetAspect * cropHeight * img.naturalHeight) / img.naturalWidth
       } else {
-        // Image is taller than 16:9, constrain by width
+        // Image is taller than template, constrain by width
         cropWidth = 90
         cropHeight = (cropWidth * img.naturalWidth) / (targetAspect * img.naturalHeight)
       }
@@ -307,9 +322,9 @@ export default function Home() {
     setCrop({
       unit: '%',
       width: 90,
-      height: 90 * (9 / 16), // 16:9 aspect ratio
+      height: 90 / templateAspect, // Use template aspect ratio
       x: 5,
-      y: (100 - (90 * (9 / 16))) / 2 // Center vertically
+      y: (100 - (90 / templateAspect)) / 2 // Center vertically
     })
     setCompletedCrop(undefined)
     
@@ -544,9 +559,9 @@ export default function Home() {
                 crop={crop}
                 onChange={(c) => setCrop(c)}
                 onComplete={(c) => setCompletedCrop(c)}
-                aspect={16/9}
+                aspect={templateAspect}
                 minWidth={200}
-                minHeight={112}
+                minHeight={200 / templateAspect}
               >
                 {uploadedImage && (
                   <img
