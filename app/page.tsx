@@ -135,19 +135,36 @@ export default function Home() {
   }
 
   // Handle image load to initialize crop
-  const handleImageLoad = () => {
-    if (imgRef.current) {
-      // Use requestAnimationFrame to ensure the image is fully rendered
-      requestAnimationFrame(() => {
-        // Use percentage for viewport-independent cropping
-        // 16:9 aspect ratio enforced by ReactCrop component
-        setCrop({
-          unit: '%',
-          width: 90,
-          height: 90 * (9 / 16), // Maintain 16:9 aspect ratio
-          x: 5, // Center horizontally (5% from left)
-          y: (100 - (90 * (9 / 16))) / 2 // Center vertically
-        })
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget
+    if (img && img.naturalWidth && img.naturalHeight) {
+      // Calculate crop dimensions based on image aspect ratio
+      // Target is 16:9 aspect ratio (1920x1080)
+      const imageAspect = img.naturalWidth / img.naturalHeight
+      const targetAspect = 16 / 9
+
+      let cropWidth = 90
+      let cropHeight = 90
+
+      if (imageAspect > targetAspect) {
+        // Image is wider than 16:9, constrain by height
+        cropHeight = 90
+        cropWidth = (targetAspect * cropHeight * img.naturalHeight) / img.naturalWidth
+      } else {
+        // Image is taller than 16:9, constrain by width
+        cropWidth = 90
+        cropHeight = (cropWidth * img.naturalWidth) / (targetAspect * img.naturalHeight)
+      }
+
+      const x = (100 - cropWidth) / 2
+      const y = (100 - cropHeight) / 2
+
+      setCrop({
+        unit: '%',
+        width: cropWidth,
+        height: cropHeight,
+        x: x,
+        y: y
       })
     }
   }
@@ -537,7 +554,7 @@ export default function Home() {
                     src={uploadedImage}
                     alt="Zu beschneidendes Bild"
                     className="max-w-full max-h-[50vh] object-contain"
-                    onLoad={handleImageLoad}
+                    onLoad={(e) => handleImageLoad(e)}
                   />
                 )}
               </ReactCrop>
