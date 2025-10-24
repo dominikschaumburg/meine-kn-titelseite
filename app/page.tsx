@@ -471,7 +471,7 @@ export default function Home() {
                 disabled={!acceptedTerms}
                 className="w-full bg-kn-blue text-white py-4 px-6 rounded-kn text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                🤳 Foto aufnehmen
+              📸 Foto aufnehmen
               </button>
 
               <div className="text-center">
