@@ -9,6 +9,10 @@ interface AnalyticsData {
   doiCompletions: number
   moderationPassed: number
   moderationFlagged: number
+  howItWorksClicks: number
+  directContestClicks: number
+  imageDownloads: number
+  imageShares: number
   lastUpdated: string
 }
 
@@ -20,14 +24,24 @@ export default function AnalyticsPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    // Check if already authenticated
-    const auth = sessionStorage.getItem('analytics_auth')
-    if (auth === 'true') {
+    // Check if already authenticated (check both sessionStorage and localStorage)
+    const sessionAuth = sessionStorage.getItem('analytics_auth')
+    const localAuth = localStorage.getItem('analytics_auth')
+    const savedPassword = localStorage.getItem('analytics_password')
+
+    if (sessionAuth === 'true' || localAuth === 'true') {
       setIsAuthenticated(true)
+      if (savedPassword) {
+        setPassword(savedPassword)
+      }
       fetchAnalytics()
       const interval = setInterval(fetchAnalytics, 10000)
       return () => clearInterval(interval)
     } else {
+      // Try to restore password if saved
+      if (savedPassword) {
+        setPassword(savedPassword)
+      }
       setLoading(false)
     }
   }, [])
@@ -46,7 +60,7 @@ export default function AnalyticsPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Simple password check (in production, this should be server-side)
     const response = await fetch('/api/analytics/auth', {
       method: 'POST',
@@ -55,7 +69,10 @@ export default function AnalyticsPage() {
     })
 
     if (response.ok) {
+      // Save to both sessionStorage and localStorage for persistence
       sessionStorage.setItem('analytics_auth', 'true')
+      localStorage.setItem('analytics_auth', 'true')
+      localStorage.setItem('analytics_password', password)
       setIsAuthenticated(true)
       setError('')
       fetchAnalytics()
@@ -212,6 +229,31 @@ export default function AnalyticsPage() {
             <p className="text-xs md:text-sm text-gray-600 mt-2 md:mt-4">
               Gesamt: {totalModerated.toLocaleString()}
             </p>
+          </div>
+
+          <div className="bg-gray-50 rounded-lg p-3 md:p-6 mb-4 md:mb-8">
+            <h2 className="text-base md:text-xl font-bold text-kn-dark mb-3 md:mb-4">Interaktionen</h2>
+            <div className="grid grid-cols-2 gap-2 md:gap-4">
+              <div className="bg-blue-50 rounded-lg p-2 md:p-4 border-2 border-blue-500">
+                <h3 className="text-xs md:text-sm font-semibold text-kn-dark mb-1 uppercase">Anleitung</h3>
+                <p className="text-xl md:text-3xl font-bold text-blue-500">{(analytics.howItWorksClicks || 0).toLocaleString()}</p>
+              </div>
+
+              <div className="bg-purple-50 rounded-lg p-2 md:p-4 border-2 border-purple-500">
+                <h3 className="text-xs md:text-sm font-semibold text-kn-dark mb-1 uppercase">Direkt Gewinnspiel</h3>
+                <p className="text-xl md:text-3xl font-bold text-purple-500">{(analytics.directContestClicks || 0).toLocaleString()}</p>
+              </div>
+
+              <div className="bg-teal-50 rounded-lg p-2 md:p-4 border-2 border-teal-500">
+                <h3 className="text-xs md:text-sm font-semibold text-kn-dark mb-1 uppercase">Downloads</h3>
+                <p className="text-xl md:text-3xl font-bold text-teal-500">{(analytics.imageDownloads || 0).toLocaleString()}</p>
+              </div>
+
+              <div className="bg-pink-50 rounded-lg p-2 md:p-4 border-2 border-pink-500">
+                <h3 className="text-xs md:text-sm font-semibold text-kn-dark mb-1 uppercase">Shares</h3>
+                <p className="text-xl md:text-3xl font-bold text-pink-500">{(analytics.imageShares || 0).toLocaleString()}</p>
+              </div>
+            </div>
           </div>
 
           <div className="bg-gray-50 rounded-lg p-3 md:p-6">

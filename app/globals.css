@@ -82,12 +82,6 @@ strong, b {
   animation-delay: 0.5s;
 }
 
-.highlight-prize {
-  color: #4F80FF;
-  font-weight: 700;
-  animation: pulseOnce 2s ease-in-out 1;
-  animation-delay: 0.5s;
-}
 
 /* Mobile orientation hints */
 @media screen and (max-width: 768px) {

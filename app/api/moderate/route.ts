@@ -74,11 +74,28 @@ export async function POST(request: NextRequest) {
       category_scores: result.category_scores
     })
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Moderation error:', error)
-    return NextResponse.json(
-      { error: 'Moderation failed' },
-      { status: 500 }
-    )
+
+    // Check if it's a rate limit error
+    if (error?.status === 429 || error?.message?.includes('rate limit') || error?.message?.includes('429')) {
+      console.warn('Rate limit exceeded for moderation API - allowing content without moderation')
+      // Return unflagged result to allow the application to continue
+      return NextResponse.json({
+        flagged: false,
+        categories: {},
+        category_scores: {},
+        warning: 'Moderation temporarily unavailable'
+      })
+    }
+
+    // For other errors, also fail gracefully
+    console.warn('Moderation API error - allowing content without moderation')
+    return NextResponse.json({
+      flagged: false,
+      categories: {},
+      category_scores: {},
+      warning: 'Moderation temporarily unavailable'
+    })
   }
 }

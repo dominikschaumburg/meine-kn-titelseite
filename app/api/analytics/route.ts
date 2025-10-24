@@ -13,6 +13,10 @@ interface AnalyticsData {
   doiCompletions: number
   moderationPassed: number
   moderationFlagged: number
+  howItWorksClicks: number
+  directContestClicks: number
+  imageDownloads: number
+  imageShares: number
   lastUpdated: string
 }
 
@@ -28,6 +32,10 @@ async function readAnalytics(): Promise<AnalyticsData> {
       doiCompletions: 0,
       moderationPassed: 0,
       moderationFlagged: 0,
+      howItWorksClicks: 0,
+      directContestClicks: 0,
+      imageDownloads: 0,
+      imageShares: 0,
       lastUpdated: new Date().toISOString()
     }
   }
@@ -41,7 +49,19 @@ export async function POST(request: NextRequest) {
   try {
     const { event } = await request.json()
 
-    if (!event || !['pageView', 'photoUpload', 'doiCompletion', 'moderationPassed', 'moderationFlagged'].includes(event)) {
+    const validEvents = [
+      'pageView',
+      'photoUpload',
+      'doiCompletion',
+      'moderationPassed',
+      'moderationFlagged',
+      'howItWorksClick',
+      'directContestClick',
+      'imageDownload',
+      'imageShare'
+    ]
+
+    if (!event || !validEvents.includes(event)) {
       return NextResponse.json({ error: 'Invalid event type' }, { status: 400 })
     }
 
@@ -58,6 +78,14 @@ export async function POST(request: NextRequest) {
       analytics.moderationPassed += 1
     } else if (event === 'moderationFlagged') {
       analytics.moderationFlagged += 1
+    } else if (event === 'howItWorksClick') {
+      analytics.howItWorksClicks += 1
+    } else if (event === 'directContestClick') {
+      analytics.directContestClicks += 1
+    } else if (event === 'imageDownload') {
+      analytics.imageDownloads += 1
+    } else if (event === 'imageShare') {
+      analytics.imageShares += 1
     }
 
     analytics.lastUpdated = new Date().toISOString()

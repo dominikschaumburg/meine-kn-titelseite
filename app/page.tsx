@@ -22,9 +22,9 @@ export default function Home() {
   const [crop, setCrop] = useState<Crop>({
     unit: '%',
     width: 90,
-    height: 50.625, // 90 * (9/16) for 16:9 aspect
+    height: 90 * (9 / 16), // 16:9 aspect ratio: 90 * (9/16) = 50.625
     x: 5,
-    y: 24.6875 // Center vertically: (100 - 50.625) / 2
+    y: (100 - (90 * (9 / 16))) / 2 // Center vertically
   })
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>()
   const imgRef = useRef<HTMLImageElement>(null)
@@ -290,9 +290,9 @@ export default function Home() {
     setCrop({
       unit: '%',
       width: 90,
-      height: 50.625, // 90 * (9/16) for 16:9 aspect
+      height: 90 * (9 / 16), // 16:9 aspect ratio
       x: 5,
-      y: 24.6875 // Center vertically: (100 - 50.625) / 2
+      y: (100 - (90 * (9 / 16))) / 2 // Center vertically
     })
     setCompletedCrop(undefined)
     
@@ -323,6 +323,13 @@ export default function Home() {
 
   const downloadImage = async () => {
     if (capturedImage && isDOICompleted) {
+      // Track download
+      fetch('/api/analytics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'imageDownload' })
+      }).catch(err => console.error('Analytics error:', err))
+
       // Detect iOS
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
 
@@ -356,6 +363,13 @@ export default function Home() {
 
   const shareImage = async () => {
     if (capturedImage && isDOICompleted && navigator.share) {
+      // Track share
+      fetch('/api/analytics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'imageShare' })
+      }).catch(err => console.error('Analytics error:', err))
+
       try {
         // Convert data URL to blob for sharing
         const response = await fetch(capturedImage)
@@ -407,15 +421,27 @@ export default function Home() {
             </h1>
 
             <p className="text-lg text-kn-dark/80 mb-6">
-              Bring dein Selfie auf die KN-Titelseite und gewinne mit etwas Glück einen <br/><strong className="highlight-prize">250-€-Gutschein für den Holstein-Fanshop im Stadion</strong>.
+              Bring dein Selfie auf die KN-Titelseite und gewinne mit etwas Glück einen <br/><strong className="font-bold text-kn-dark">250-€-Gutschein für den Holstein-Fanshop im Stadion</strong>.
             </p>
 
-            <button
-              onClick={() => setShowOnboarding(true)}
-              className="mb-6 text-kn-blue text-sm hover:text-kn-dark transition-colors animate-pulse-once"
-            >
-              <b>ℹ️ So funktioniert's</b>
-            </button>
+            <div className="mb-6 flex justify-center">
+              <button
+                onClick={() => {
+                  setShowOnboarding(true)
+                  fetch('/api/analytics', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ event: 'howItWorksClick' })
+                  }).catch(err => console.error('Analytics error:', err))
+                }}
+                className="inline-flex items-center gap-2 bg-blue-50 text-kn-blue px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-100 transition-colors border border-blue-200"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                So funktioniert's
+              </button>
+            </div>
 
             {error && (
               <div className="bg-kn-red/10 border border-kn-red text-kn-red p-4 rounded-lg mb-4">
@@ -423,23 +449,23 @@ export default function Home() {
               </div>
             )}
 
-            <div className="flex items-start space-x-3 mb-6 text-left">
+            <div className="flex items-start space-x-4 mb-6 text-left">
               <input
                 type="checkbox"
                 id="terms"
                 checked={acceptedTerms}
                 onChange={(e) => setAcceptedTerms(e.target.checked)}
-                className="mt-1 w-4 h-4 text-kn-blue"
+                className="mt-1 w-5 h-5 text-kn-blue cursor-pointer flex-shrink-0"
               />
-              <label htmlFor="terms" className="text-sm text-kn-dark/70">
+              <label htmlFor="terms" className="text-sm text-kn-dark/70 cursor-pointer">
                 Ich akzeptiere die{' '}
-                <a href="/agb" className="text-kn-blue hover:text-kn-dark transition-colors">Nutzungsbedingungen</a>
+                <a href="/agb" className="text-kn-blue hover:text-kn-dark transition-colors inline-block py-1" onClick={(e) => e.stopPropagation()}>Nutzungsbedingungen</a>
                 {' '}und{' '}
-                <a href="/datenschutz" className="text-kn-blue hover:text-kn-dark transition-colors">Datenschutzerklärung</a>
+                <a href="/datenschutz" className="text-kn-blue hover:text-kn-dark transition-colors inline-block py-1" onClick={(e) => e.stopPropagation()}>Datenschutzerklärung</a>
               </label>
             </div>
 
-            <div className="flex flex-col space-y-3 w-full">
+            <div className="flex flex-col space-y-4 w-full">
               <button
                 onClick={triggerFileUpload}
                 disabled={!acceptedTerms}
@@ -448,14 +474,26 @@ export default function Home() {
                 🤳 Foto aufnehmen
               </button>
 
-              <a
-                href="https://aktion.kn-online.de/angebot/o7bl6/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full bg-kn-blue text-white py-4 px-6 rounded-kn text-lg font-medium text-center transition-colors block"
-              >
-              Ich möchte nur am Gewinnspiel teilnehmen
-              </a>
+              <div className="text-center">
+                <p className="text-sm text-kn-dark/70 mb-2">
+                  Du möchtest kein Foto aufnehmen?
+                </p>
+                <a
+                  href="https://aktion.kn-online.de/angebot/hoki-gewinnspiel"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => {
+                    fetch('/api/analytics', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ event: 'directContestClick' })
+                    }).catch(err => console.error('Analytics error:', err))
+                  }}
+                  className="text-sm text-kn-blue hover:text-kn-dark transition-colors underline"
+                >
+                  Hier geht's direkt zum Gewinnspiel
+                </a>
+              </div>
             </div>
 
             <input
@@ -515,9 +553,17 @@ export default function Home() {
               <button
                 onClick={processCroppedImage}
                 disabled={isProcessing || !crop.width || !crop.height}
-                className="flex-1 bg-kn-blue text-white py-3 px-4 md:px-6 rounded-kn font-medium disabled:opacity-50 transition-colors text-sm md:text-base"
+                className="flex-1 bg-kn-blue text-white py-3 px-4 md:px-6 rounded-kn font-medium disabled:opacity-50 transition-colors text-sm md:text-base relative"
               >
-                {isProcessing ? '⏳ Verarbeite...' : '✅ Foto verwenden'}
+                {isProcessing ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Verarbeite...
+                  </span>
+                ) : '✅ Foto verwenden'}
               </button>
             </div>
 
@@ -676,7 +722,7 @@ export default function Home() {
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-kn-dark mb-2">🎁 Gewinnspiel & Freischalten</h3>
                   <p className="text-gray-700">
-                    Registriere dich, bestätige deine E-Mail und schalte deine Titelseite frei. Gewinne <strong className="highlight-prize">250-€-Gutschein für den Holstein-Fanshop!</strong>
+                    Registriere dich, bestätige deine E-Mail und schalte deine Titelseite frei. Gewinne <strong className="font-bold text-kn-dark">250-€-Gutschein für den Holstein-Fanshop!</strong>
                   </p>
                 </div>
               </div>
@@ -696,9 +742,14 @@ export default function Home() {
             </div>
 
             <div className="mt-8 pt-6 border-t border-gray-200">
-              <div className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-lg mb-4">
-                <p className="text-sm">
+              <div className="bg-green-50 border border-green-200 text-green-800 p-3 rounded-lg mb-4">
+                <p className="text-xs">
                   <strong>🔒 Privat & sicher:</strong> Fotos bleiben auf deinem Gerät. Keine Speicherung, keine Veröffentlichung.
+                </p>
+              </div>
+              <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-lg mb-4">
+                <p className="text-xs">
+                  <strong>⚠️ Hinweis:</strong> Bitte verwende keinen Inkognito-Modus, da dies zu Problemen führen kann.
                 </p>
               </div>
               <button

@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     description: 'Erstelle deine personalisierte KN-Titelseite mit einem Selfie.',
     images: [
       {
-        url: '/assets/preview.gif',
+        url: '/assets/share-image.jpg',
         width: 1200,
         height: 630,
         alt: 'Meine KN-Titelseite Vorschau'
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Meine KN-Titelseite',
     description: 'Erstelle deine personalisierte KN-Titelseite mit einem Selfie.',
-    images: ['/assets/preview.gif']
+    images: ['/assets/share-image.jpg']
   }
 }
 
