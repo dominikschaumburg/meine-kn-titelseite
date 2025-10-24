@@ -35,4 +35,4 @@ yarn-error.log*
 next-env.d.ts
 
 # storage (generated images)
-/storage/generated-images/
+/storage/generated-images/analytics.json
