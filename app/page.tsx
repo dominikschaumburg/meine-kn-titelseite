@@ -735,23 +735,12 @@ export default function Home() {
               </p>
 
               <p className="text-base text-kn-dark/80 text-center">
-                Die Aktion ist leider beendet. Du kannst aber weiterhin am Gewinnspiel teilnehmen!
+                Die Aktion und das Gewinnspiel sind leider beendet.
               </p>
-
-              <div className="pt-4">
-                <a
-                  href="https://aktion.kn-online.de/angebot/hoki-gewinnspiel"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full bg-kn-blue text-white py-3 px-6 rounded-kn text-lg font-medium text-center transition-colors block hover:bg-kn-dark"
-                >
-                  🎁 Zum Gewinnspiel
-                </a>
-              </div>
 
               <button
                 onClick={() => setShowActionEndedModal(false)}
-                className="w-full bg-gray-500 text-white py-2 px-4 rounded-kn font-medium transition-colors text-sm hover:bg-gray-600"
+                className="w-full bg-kn-blue text-white py-3 px-6 rounded-kn text-lg font-medium transition-colors hover:bg-kn-dark"
               >
                 Schließen
               </button>
