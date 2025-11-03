@@ -19,7 +19,11 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null)
   const [isDOICompleted, setIsDOICompleted] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [showActionEndedModal, setShowActionEndedModal] = useState(false)
   const [templateAspect, setTemplateAspect] = useState<number>(1.75) // Default to template aspect ratio
+
+  // Configuration: Set to false when action has ended
+  const isActionActive = false
   const [crop, setCrop] = useState<Crop>({
     unit: '%',
     width: 90,
@@ -185,6 +189,10 @@ export default function Home() {
   }
 
   const triggerFileUpload = () => {
+    if (!isActionActive) {
+      setShowActionEndedModal(true)
+      return
+    }
     fileInputRef.current?.click()
   }
 
@@ -704,6 +712,53 @@ export default function Home() {
       </main>
 
       <canvas ref={canvasRef} className="hidden" />
+
+      {/* Action Ended Modal */}
+      {showActionEndedModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowActionEndedModal(false)}>
+          <div className="bg-white rounded-lg max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-kn-dark">Aktion beendet</h2>
+              <button
+                onClick={() => setShowActionEndedModal(false)}
+                className="text-2xl text-gray-500 hover:text-gray-700"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="text-6xl mb-4 text-center">😊</div>
+
+              <p className="text-lg text-kn-dark text-center">
+                Vielen Dank für dein Interesse!
+              </p>
+
+              <p className="text-base text-kn-dark/80 text-center">
+                Die Aktion ist leider beendet. Du kannst aber weiterhin am Gewinnspiel teilnehmen!
+              </p>
+
+              <div className="pt-4">
+                <a
+                  href="https://aktion.kn-online.de/angebot/hoki-gewinnspiel"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-kn-blue text-white py-3 px-6 rounded-kn text-lg font-medium text-center transition-colors block hover:bg-kn-dark"
+                >
+                  🎁 Zum Gewinnspiel
+                </a>
+              </div>
+
+              <button
+                onClick={() => setShowActionEndedModal(false)}
+                className="w-full bg-gray-500 text-white py-2 px-4 rounded-kn font-medium transition-colors text-sm hover:bg-gray-600"
+              >
+                Schließen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Onboarding Modal */}
       {showOnboarding && (
