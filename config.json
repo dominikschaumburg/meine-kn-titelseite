@@ -1,0 +1,15 @@
+{
+  "version": "1.0",
+  "whiteLabel": {
+    "contestPrize": "",
+    "doiUrl": "https://aktion.kn-online.de/angebot/o7bl6",
+    "actionStart": "2026-01-13T00:00:00.000Z",
+    "actionEnd": "2026-01-30T16:00:00.000Z",
+    "moderationEnabled": false,
+    "formalAddress": true
+  },
+  "security": {
+    "doiSecret": "REPLACE_WITH_RANDOM_SECRET_ON_FIRST_RUN",
+    "adminPassword": "kn2025analytics"
+  }
+}

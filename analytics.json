@@ -1,8 +1,162 @@
 {
-  "pageViews": 91,
-  "photoUploads": 19,
-  "doiCompletions": 5,
-  "moderationPassed": 17,
+  "pageViews": 13,
+  "photoUploads": 7,
+  "doiCompletions": 4,
+  "moderationPassed": 0,
   "moderationFlagged": 0,
-  "lastUpdated": "2025-10-23T15:11:53.449Z"
+  "lastUpdated": "2026-01-14T09:24:34.635Z",
+  "howItWorksClicks": 16,
+  "events": [
+    {
+      "type": "pageView",
+      "timestamp": "2026-01-13T18:19:36.389Z"
+    },
+    {
+      "type": "pageView",
+      "timestamp": "2026-01-13T18:21:47.506Z"
+    },
+    {
+      "type": "howItWorksClick",
+      "timestamp": "2026-01-13T18:21:48.544Z"
+    },
+    {
+      "type": "howItWorksClick",
+      "timestamp": "2026-01-13T18:22:28.795Z"
+    },
+    {
+      "type": "pageView",
+      "timestamp": "2026-01-13T18:23:06.238Z"
+    },
+    {
+      "type": "pageView",
+      "timestamp": "2026-01-13T18:23:07.577Z"
+    },
+    {
+      "type": "pageView",
+      "timestamp": "2026-01-13T18:28:10.972Z"
+    },
+    {
+      "type": "pageView",
+      "timestamp": "2026-01-13T18:28:23.006Z"
+    },
+    {
+      "type": "pageView",
+      "timestamp": "2026-01-13T18:29:03.468Z"
+    },
+    {
+      "type": "howItWorksClick",
+      "timestamp": "2026-01-13T18:29:10.674Z"
+    },
+    {
+      "type": "howItWorksClick",
+      "timestamp": "2026-01-13T18:30:21.318Z"
+    },
+    {
+      "type": "howItWorksClick",
+      "timestamp": "2026-01-13T18:30:34.862Z"
+    },
+    {
+      "type": "pageView",
+      "timestamp": "2026-01-13T18:34:03.108Z"
+    },
+    {
+      "type": "photoUpload",
+      "timestamp": "2026-01-13T18:36:08.078Z"
+    },
+    {
+      "type": "photoUpload",
+      "timestamp": "2026-01-13T18:37:00.549Z"
+    },
+    {
+      "type": "howItWorksClick",
+      "timestamp": "2026-01-13T18:44:38.288Z"
+    },
+    {
+      "type": "photoUpload",
+      "timestamp": "2026-01-13T18:45:04.872Z"
+    },
+    {
+      "type": "doiCompletion",
+      "timestamp": "2026-01-13T18:45:35.589Z"
+    },
+    {
+      "type": "imageDownload",
+      "timestamp": "2026-01-13T18:45:45.184Z"
+    },
+    {
+      "type": "imageShare",
+      "timestamp": "2026-01-13T18:45:48.388Z"
+    },
+    {
+      "type": "photoUpload",
+      "timestamp": "2026-01-13T18:46:03.096Z"
+    },
+    {
+      "type": "doiCompletion",
+      "timestamp": "2026-01-13T18:46:05.574Z"
+    },
+    {
+      "type": "photoUpload",
+      "timestamp": "2026-01-13T18:46:41.329Z"
+    },
+    {
+      "type": "doiCompletion",
+      "timestamp": "2026-01-13T18:46:43.817Z"
+    },
+    {
+      "type": "howItWorksClick",
+      "timestamp": "2026-01-14T07:23:16.495Z"
+    },
+    {
+      "type": "howItWorksClick",
+      "timestamp": "2026-01-14T07:27:32.115Z"
+    },
+    {
+      "type": "howItWorksClick",
+      "timestamp": "2026-01-14T07:30:27.830Z"
+    },
+    {
+      "type": "howItWorksClick",
+      "timestamp": "2026-01-14T07:30:44.765Z"
+    },
+    {
+      "type": "howItWorksClick",
+      "timestamp": "2026-01-14T07:36:41.453Z"
+    },
+    {
+      "type": "howItWorksClick",
+      "timestamp": "2026-01-14T08:56:11.524Z"
+    },
+    {
+      "type": "howItWorksClick",
+      "timestamp": "2026-01-14T09:11:20.828Z"
+    },
+    {
+      "type": "howItWorksClick",
+      "timestamp": "2026-01-14T09:23:11.655Z"
+    },
+    {
+      "type": "howItWorksClick",
+      "timestamp": "2026-01-14T09:23:18.204Z"
+    },
+    {
+      "type": "howItWorksClick",
+      "timestamp": "2026-01-14T09:23:31.041Z"
+    },
+    {
+      "type": "photoUpload",
+      "timestamp": "2026-01-14T09:23:59.200Z"
+    },
+    {
+      "type": "doiCompletion",
+      "timestamp": "2026-01-14T09:24:02.215Z"
+    },
+    {
+      "type": "photoUpload",
+      "timestamp": "2026-01-14T09:24:34.635Z"
+    }
+  ],
+  "interactions": 0,
+  "imageDownloads": null,
+  "imageShares": null
 }

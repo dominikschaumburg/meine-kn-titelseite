@@ -33,16 +33,15 @@ export default function OverloadPage() {
           </h1>
 
           <p className="text-lg text-kn-dark/80">
-            Unser Server ist gerade überlastet. Zu viele KN-Fans wollen gleichzeitig ihre persönliche Titelseite erstellen.
+            Unser Server ist gerade überlastet.
           </p>
-
           <p className="text-base text-kn-dark/70">
-            Kein Problem: Du kannst trotzdem am Gewinnspiel teilnehmen und später nochmal vorbeischauen!
+            Du kannst trotzdem am Gewinnspiel teilnehmen und später nochmal vorbeischauen!
           </p>
 
           <div className="flex flex-col space-y-3 w-full pt-4">
             <a
-              href="https://aktion.kn-online.de/angebot/o7bl6/"
+              href="https://aktion.kn-online.de/angebot/hoki-gewinnspiel"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full bg-kn-blue text-white py-4 px-6 rounded-kn text-lg font-medium text-center transition-colors block hover:bg-kn-dark"

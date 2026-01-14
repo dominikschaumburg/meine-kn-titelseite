@@ -7,6 +7,7 @@ import ReactCrop, { Crop, PixelCrop } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 import { KNStorage } from '../utils/storage'
 import { renderTemplate, TemplateConfig } from '../utils/clientTemplateRenderer'
+import { getText } from '../lib/texts'
 
 export default function Home() {
   const [currentStep, setCurrentStep] = useState<'intro' | 'upload' | 'crop' | 'preview'>('intro')
@@ -21,9 +22,15 @@ export default function Home() {
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [showActionEndedModal, setShowActionEndedModal] = useState(false)
   const [templateAspect, setTemplateAspect] = useState<number>(1.75) // Default to template aspect ratio
+  const [appConfig, setAppConfig] = useState<any>(null)
 
-  // Configuration: Set to false when action has ended
-  const isActionActive = false
+  // Calculate isActionActive from config dates
+  const isActionActive = appConfig ? (() => {
+    const now = Date.now()
+    const start = new Date(appConfig.whiteLabel.actionStart).getTime()
+    const end = new Date(appConfig.whiteLabel.actionEnd).getTime()
+    return now >= start && now <= end
+  })() : false
   const [crop, setCrop] = useState<Crop>({
     unit: '%',
     width: 90,
@@ -37,6 +44,19 @@ export default function Home() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   
   useEffect(() => {
+    // Load app config
+    const loadConfig = async () => {
+      try {
+        const response = await fetch('/api/config')
+        const data = await response.json()
+        setAppConfig(data)
+      } catch (err) {
+        console.error('Failed to load config:', err)
+      }
+    }
+
+    loadConfig()
+
     // Load template config to get the correct aspect ratio
     const loadTemplateConfig = async () => {
       try {
@@ -52,12 +72,21 @@ export default function Home() {
 
     loadTemplateConfig()
 
-    // Track page view
-    fetch('/api/analytics', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ event: 'pageView' })
-    }).catch(err => console.error('Analytics error:', err))
+    // Track page view (only once per session)
+    if (typeof window !== 'undefined') {
+      const sessionKey = 'kn_page_view_tracked'
+      const hasTracked = sessionStorage.getItem(sessionKey)
+
+      if (!hasTracked) {
+        fetch('/api/analytics', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ event: 'pageView' })
+        }).catch(err => console.error('Analytics error:', err))
+
+        sessionStorage.setItem(sessionKey, 'true')
+      }
+    }
 
     // Check if there's an existing session OR if we're returning from DOI
     if (typeof window !== 'undefined') {
@@ -343,6 +372,23 @@ export default function Home() {
   }
 
   const openRegistration = () => {
+    // Check if DOI URL is configured
+    if (!appConfig?.whiteLabel?.doiUrl) {
+      // No DOI URL configured - unlock image immediately
+      console.log('No DOI URL configured, unlocking image immediately')
+      KNStorage.markDOICompleted()
+      setIsDOICompleted(true)
+
+      // Track DOI completion
+      fetch('/api/analytics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'doiCompletion' })
+      }).catch(err => console.error('Analytics error:', err))
+
+      return
+    }
+
     // Mark registration start time
     KNStorage.markRegistrationStart()
 
@@ -354,9 +400,11 @@ export default function Home() {
       `${window.location.origin}?doi_completed=${doiTimestamp}&session_id=${currentSessionId}`
     )
 
-    // Open registration page with callback URL
+    // Open registration page with callback URL from config
     // The DOI system should redirect to this callback URL on success
-    const registrationUrl = `https://aktion.kn-online.de/angebot/o7bl6?callback=${callbackUrl}`
+    const registrationUrl = appConfig.whiteLabel.doiUrl.includes('?')
+      ? `${appConfig.whiteLabel.doiUrl}&callback=${callbackUrl}`
+      : `${appConfig.whiteLabel.doiUrl}?callback=${callbackUrl}`
 
     window.open(registrationUrl, '_blank', 'width=800,height=600')
   }
@@ -457,11 +505,12 @@ export default function Home() {
             </div>
 
             <h1 className="text-3xl font-bold text-kn-dark mb-4">
-              Deine KN-Titelseite
+              {appConfig?.whiteLabel?.formalAddress ? 'Ihre' : 'Deine'} KN-Titelseite
             </h1>
 
             <p className="text-lg text-kn-dark/80 mb-6">
-              Bring dein Selfie auf die KN-Titelseite und gewinne mit etwas Glück einen <br/><strong className="font-bold text-kn-dark">250-€-Gutschein für den Holstein-Fanshop im Stadion</strong>.
+              {getText(appConfig, 'intro.headline')}{appConfig?.whiteLabel?.contestPrize && ` und gewinne mit etwas Glück `}
+              {appConfig?.whiteLabel?.contestPrize && <><br/><strong className="font-bold text-kn-dark">{appConfig.whiteLabel.contestPrize}</strong></>}.
             </p>
 
             <div className="mb-6 flex justify-center">
@@ -514,26 +563,6 @@ export default function Home() {
               📸 Foto aufnehmen
               </button>
 
-              <div className="text-center">
-                <p className="text-sm text-kn-dark/70 mb-2">
-                  Du möchtest kein Foto aufnehmen?
-                </p>
-                <a
-                  href="https://aktion.kn-online.de/angebot/hoki-gewinnspiel"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => {
-                    fetch('/api/analytics', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ event: 'directContestClick' })
-                    }).catch(err => console.error('Analytics error:', err))
-                  }}
-                  className="text-sm text-kn-blue hover:text-kn-dark transition-colors underline"
-                >
-                  Hier geht's direkt zum Gewinnspiel
-                </a>
-              </div>
             </div>
 
             <input
@@ -558,7 +587,7 @@ export default function Home() {
 
             <div className="bg-blue-50 border border-blue-200 text-blue-800 p-2 rounded-lg mb-3">
               <p className="text-xs md:text-sm">
-                📏 Ziehe den Rahmen, um dein Foto passend zuzuschneiden.
+                📏 {getText(appConfig, 'crop.instruction')}
               </p>
             </div>
 
@@ -651,17 +680,17 @@ export default function Home() {
             {!isDOICompleted ? (
               <div className="bg-yellow-50 border border-yellow-400 text-yellow-800 p-3 rounded-lg">
                 <p className="text-xs md:text-sm font-medium mb-1">
-                  🎁 📧 Klicke auf den Button unten, um am Gewinnspiel teilzunehmen und deine personalisierte Titelseite in voller Auflösung zu erhalten.
+                  🎁 📧 {getText(appConfig, 'preview.doi.instruction')}
                 </p>
               </div>
             ) : (
               <div className="bg-green-50 border border-green-400 text-green-800 p-3 rounded-lg">
                 <p className="text-xs md:text-sm font-medium">
-                  ✅ Geschafft! Deine Titelseite ist freigeschaltet! <br/>
-                  Du kannst das Bild jetzt speichern und teilen.
+                  ✅ Geschafft! {appConfig?.whiteLabel?.formalAddress ? 'Ihre' : 'Deine'} Titelseite ist freigeschaltet! <br/>
+                  {getText(appConfig, 'preview.completed.message')}
                 </p>
                 <p className="text-xs mt-2">
-                📱 Wenn du magst, teile deine Titelseite gerne auf Social Media und markiere <strong>@kieler.nachrichten</strong>
+                📱 {getText(appConfig, 'preview.completed.share')} <strong>@kieler.nachrichten</strong>
                 </p>
               </div>
             )}
@@ -673,7 +702,7 @@ export default function Home() {
                     onClick={openRegistration}
                     className="w-full bg-kn-blue text-white py-4 px-6 rounded-kn font-medium transition-colors text-base"
                   >
-                    Am Gewinnspiel teilnehmen & Titelseite freischalten
+                    {getText(appConfig, 'preview.doi.button')}
                   </button>
                   <button
                     onClick={resetApp}
@@ -731,7 +760,7 @@ export default function Home() {
               <div className="text-6xl mb-4 text-center">😊</div>
 
               <p className="text-lg text-kn-dark text-center">
-                Vielen Dank für dein Interesse!
+                {getText(appConfig, 'actionEnded.message')}
               </p>
 
               <p className="text-base text-kn-dark/80 text-center">
@@ -772,7 +801,7 @@ export default function Home() {
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-kn-dark mb-2">📸 Foto aufnehmen</h3>
                   <p className="text-gray-700">
-                    Nimm ein Selfie auf. Halte dein Smartphone am besten im Querformat.
+                    {getText(appConfig, 'intro.step1')}
                   </p>
                 </div>
               </div>
@@ -796,9 +825,9 @@ export default function Home() {
                   3
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-kn-dark mb-2">🎁 Gewinnspiel & Freischalten</h3>
+                  <h3 className="text-xl font-bold text-kn-dark mb-2">🎁 {appConfig?.whiteLabel?.contestPrize ? 'Gewinnspiel & Freischalten' : 'Freischalten'}</h3>
                   <p className="text-gray-700">
-                    Registriere dich, bestätige deine E-Mail und schalte deine Titelseite frei. Gewinne <strong className="font-bold text-kn-dark">250-€-Gutschein für den Holstein-Fanshop!</strong>
+                    {getText(appConfig, 'intro.step2')}{appConfig?.whiteLabel?.contestPrize && <>. Gewinne <strong className="font-bold text-kn-dark">{appConfig.whiteLabel.contestPrize}</strong></>}!
                   </p>
                 </div>
               </div>
@@ -811,7 +840,7 @@ export default function Home() {
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-kn-dark mb-2">💾 Speichern & Teilen</h3>
                   <p className="text-gray-700">
-                  Speichere und teile deine Titelseite.
+                    {getText(appConfig, 'intro.step3')}
                   </p>
                 </div>
               </div>
@@ -820,7 +849,7 @@ export default function Home() {
             <div className="mt-8 pt-6 border-t border-gray-200">
               <div className="bg-green-50 border border-green-200 text-green-800 p-3 rounded-lg mb-4">
                 <p className="text-xs">
-                  <strong>🔒 Privat & sicher:</strong> Fotos bleiben auf deinem Gerät. Keine Speicherung, keine Veröffentlichung.
+                  <strong>🔒 Privat & sicher:</strong> {getText(appConfig, 'intro.privacy')}
                 </p>
               </div>
               <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-lg mb-4">

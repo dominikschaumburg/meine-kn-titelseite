@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { promises as fs } from 'fs'
 import path from 'path'
+import { loadConfig } from '@/lib/config'
 
 const ANALYTICS_FILE = path.join(process.cwd(), 'analytics.json')
 
@@ -25,23 +26,37 @@ async function trackModeration(flagged: boolean) {
 }
 
 export async function POST(request: NextRequest) {
-  // Initialize OpenAI-compatible client with litellm endpoint
-  const apiKey = process.env.LITELLM_API_KEY
-
-  if (!apiKey) {
-    console.error('LITELLM_API_KEY environment variable is not set')
-    return NextResponse.json(
-      { error: 'Moderation service is not configured' },
-      { status: 500 }
-    )
-  }
-
-  const openai = new OpenAI({
-    apiKey: apiKey,
-    baseURL: 'https://litellm.ki.rndtech.de/v1'
-  })
-
   try {
+    // Check if moderation is enabled in config
+    const config = await loadConfig()
+
+    if (!config.whiteLabel.moderationEnabled) {
+      console.log('Moderation is disabled in config, skipping check')
+      return NextResponse.json({
+        flagged: false,
+        categories: {},
+        category_scores: {},
+        skipped: true,
+        message: 'Moderation disabled'
+      })
+    }
+
+    // Initialize OpenAI-compatible client with litellm endpoint
+    const apiKey = process.env.LITELLM_API_KEY
+
+    if (!apiKey) {
+      console.error('LITELLM_API_KEY environment variable is not set')
+      return NextResponse.json(
+        { error: 'Moderation service is not configured' },
+        { status: 500 }
+      )
+    }
+
+    const openai = new OpenAI({
+      apiKey: apiKey,
+      baseURL: 'https://litellm.ki.rndtech.de/v1'
+    })
+
     const { image } = await request.json()
 
     if (!image) {

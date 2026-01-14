@@ -1,0 +1,232 @@
+<!-- Minimalistisches DOI-Code Snippet für die Erfolgsseite -->
+<style>
+  .kn-doi-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .kn-code-display {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin: 20px 0;
+  }
+
+  .kn-code-digit {
+    width: 48px;
+    height: 60px;
+    background: #f9fafb;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    color: #1f2937;
+  }
+
+  .kn-code-digit.loading {
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .kn-copy-btn {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 20px 0;
+  }
+
+  .kn-copy-btn:hover {
+    background: #1d4ed8;
+  }
+
+  .kn-copy-btn:active {
+    transform: scale(0.98);
+  }
+
+  .kn-copy-btn.copied {
+    background: #10b981;
+  }
+
+  .kn-copy-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+  }
+
+  .kn-instructions {
+    text-align: left;
+    margin-top: 30px;
+  }
+
+  .kn-instructions ol {
+    list-style: none;
+    counter-reset: step-counter;
+    padding: 0;
+    margin: 15px 0;
+  }
+
+  .kn-instructions li {
+    counter-increment: step-counter;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    color: #4b5563;
+    line-height: 1.6;
+  }
+
+  .kn-instructions li::before {
+    content: counter(step-counter);
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: #2563eb;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .kn-error {
+    color: #dc2626;
+    font-size: 14px;
+    margin-top: 10px;
+  }
+</style>
+
+<div class="kn-doi-container">
+  <h2 style="color: #1f2937; font-size: 24px; margin-bottom: 10px;">Registrierung erfolgreich!</h2>
+  <p style="color: #6b7280; margin-bottom: 20px;">Ihr Freischaltcode:</p>
+
+  <div class="kn-code-display" id="kn-code-display">
+    <div class="kn-code-digit loading">-</div>
+    <div class="kn-code-digit loading">-</div>
+    <div class="kn-code-digit loading">-</div>
+    <div class="kn-code-digit loading">-</div>
+  </div>
+
+  <button class="kn-copy-btn" id="kn-copy-btn" disabled>Code kopieren</button>
+
+  <div class="kn-instructions">
+    <ol>
+      <li>Kehren Sie zur Titelseiten-App zurück</li>
+      <li>Geben Sie dort diesen 4-stelligen Code ein</li>
+      <li>Ihre Titelseite wird sofort freigeschaltet</li>
+    </ol>
+  </div>
+
+  <div id="kn-error-message" class="kn-error" style="display: none;"></div>
+</div>
+
+<script>
+(async function() {
+  const codeDisplay = document.getElementById('kn-code-display')
+  const copyButton = document.getElementById('kn-copy-btn')
+  const errorElement = document.getElementById('kn-error-message')
+  let generatedCode = ''
+
+  try {
+    // Session-ID aus URL-Parameter (optional)
+    const params = new URLSearchParams(window.location.search)
+    const sessionId = params.get('session_id') || `doi-${Date.now()}`
+
+    // WICHTIG: Ersetze diese URL mit deiner tatsächlichen Domain
+    const API_URL = 'https://ihre-domain.de/api/doi-code/generate'
+
+    // API-Aufruf zur Code-Generierung
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId })
+    })
+
+    if (!response.ok) {
+      throw new Error('API-Fehler')
+    }
+
+    const data = await response.json()
+    generatedCode = data.code
+
+    // Code in einzelne Ziffern aufteilen und anzeigen
+    const digits = generatedCode.split('')
+    const digitElements = codeDisplay.querySelectorAll('.kn-code-digit')
+
+    digits.forEach((digit, index) => {
+      if (digitElements[index]) {
+        digitElements[index].textContent = digit
+        digitElements[index].classList.remove('loading')
+      }
+    })
+
+    copyButton.disabled = false
+
+    // Auto-copy beim Laden (optional)
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(generatedCode)
+        console.log('Code automatisch kopiert')
+      }
+    } catch (e) {
+      // Ignoriere Fehler beim Auto-Copy
+    }
+  } catch (error) {
+    console.error('Fehler beim Laden des Codes:', error)
+    const digitElements = codeDisplay.querySelectorAll('.kn-code-digit')
+    digitElements.forEach(el => {
+      el.textContent = '✗'
+      el.classList.remove('loading')
+      el.style.fontSize = '24px'
+    })
+    errorElement.textContent = 'Fehler beim Laden des Codes. Bitte kontaktieren Sie den Support.'
+    errorElement.style.display = 'block'
+  }
+
+  // Copy-Button Handler
+  copyButton.addEventListener('click', async function() {
+    if (!generatedCode) return
+
+    try {
+      await navigator.clipboard.writeText(generatedCode)
+      this.textContent = '✓ Kopiert!'
+      this.classList.add('copied')
+
+      setTimeout(() => {
+        this.textContent = 'Code kopieren'
+        this.classList.remove('copied')
+      }, 2000)
+    } catch (error) {
+      // Fallback: Zeige Hinweis
+      this.textContent = 'Bitte manuell kopieren (Strg+C / Cmd+C)'
+
+      // Versuche Code zu selektieren
+      const range = document.createRange()
+      range.selectNode(codeDisplay)
+      window.getSelection().removeAllRanges()
+      window.getSelection().addRange(range)
+
+      setTimeout(() => {
+        this.textContent = 'Code kopieren'
+      }, 3000)
+    }
+  })
+})()
+</script>

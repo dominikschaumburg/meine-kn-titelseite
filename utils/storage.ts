@@ -177,11 +177,11 @@ export class KNStorage {
   // Get debug info (for debugging)
   static getDebugInfo(): any {
     if (typeof window === 'undefined') return null
-    
+
     try {
       const currentSession = this.getCurrentSession()
       const doiCompleted = localStorage.getItem(`${this.PREFIX}doi_completed`)
-      
+
       return {
         currentSession,
         doiCompleted: doiCompleted ? new Date(parseInt(doiCompleted)).toISOString() : null,
@@ -191,6 +191,61 @@ export class KNStorage {
     } catch (error) {
       console.error('Failed to get debug info:', error)
       return null
+    }
+  }
+
+  // Save DOI code to localStorage
+  static saveDOICode(code: string): void {
+    if (typeof window === 'undefined') return
+
+    try {
+      localStorage.setItem(`${this.PREFIX}doi_code`, code)
+      localStorage.setItem(`${this.PREFIX}doi_verified`, Date.now().toString())
+    } catch (error) {
+      console.error('Failed to save DOI code:', error)
+    }
+  }
+
+  // Get saved DOI code
+  static getDOICode(): string | null {
+    if (typeof window === 'undefined') return null
+
+    try {
+      return localStorage.getItem(`${this.PREFIX}doi_code`)
+    } catch (error) {
+      console.error('Failed to get DOI code:', error)
+      return null
+    }
+  }
+
+  // Check if DOI code is verified
+  static isDOIVerified(): boolean {
+    if (typeof window === 'undefined') return false
+
+    try {
+      const verifiedTime = localStorage.getItem(`${this.PREFIX}doi_verified`)
+      if (!verifiedTime) return false
+
+      const timestamp = parseInt(verifiedTime)
+      // Check if verification is not older than 24h
+      const isValid = Date.now() - timestamp < this.SESSION_DURATION
+
+      return isValid
+    } catch (error) {
+      console.error('Failed to check DOI verification:', error)
+      return false
+    }
+  }
+
+  // Remove DOI code
+  static removeDOICode(): void {
+    if (typeof window === 'undefined') return
+
+    try {
+      localStorage.removeItem(`${this.PREFIX}doi_code`)
+      localStorage.removeItem(`${this.PREFIX}doi_verified`)
+    } catch (error) {
+      console.error('Failed to remove DOI code:', error)
     }
   }
 }

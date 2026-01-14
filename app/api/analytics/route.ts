@@ -7,6 +7,11 @@ import path from 'path'
 
 const ANALYTICS_FILE = path.join(process.cwd(), 'analytics.json')
 
+interface AnalyticsEvent {
+  type: string
+  timestamp: string
+}
+
 interface AnalyticsData {
   pageViews: number
   photoUploads: number
@@ -17,13 +22,27 @@ interface AnalyticsData {
   directContestClicks: number
   imageDownloads: number
   imageShares: number
+  interactions: number
   lastUpdated: string
+  events: AnalyticsEvent[]
 }
 
 async function readAnalytics(): Promise<AnalyticsData> {
   try {
     const data = await fs.readFile(ANALYTICS_FILE, 'utf-8')
-    return JSON.parse(data)
+    const parsed = JSON.parse(data)
+
+    // Ensure events array exists (migration)
+    if (!parsed.events) {
+      parsed.events = []
+    }
+
+    // Ensure interactions field exists (migration)
+    if (parsed.interactions === undefined) {
+      parsed.interactions = (parsed.imageDownloads || 0) + (parsed.imageShares || 0)
+    }
+
+    return parsed
   } catch {
     // File doesn't exist yet, return default values
     return {
@@ -36,13 +55,25 @@ async function readAnalytics(): Promise<AnalyticsData> {
       directContestClicks: 0,
       imageDownloads: 0,
       imageShares: 0,
-      lastUpdated: new Date().toISOString()
+      interactions: 0,
+      lastUpdated: new Date().toISOString(),
+      events: []
     }
   }
 }
 
 async function writeAnalytics(data: AnalyticsData): Promise<void> {
-  await fs.writeFile(ANALYTICS_FILE, JSON.stringify(data, null, 2))
+  // Prune old events (keep last 30 days)
+  const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000)
+  data.events = data.events.filter(event => {
+    const eventTime = new Date(event.timestamp).getTime()
+    return eventTime > thirtyDaysAgo
+  })
+
+  // Atomic write (write to temp, then rename)
+  const tempFile = `${ANALYTICS_FILE}.tmp`
+  await fs.writeFile(tempFile, JSON.stringify(data, null, 2))
+  await fs.rename(tempFile, ANALYTICS_FILE)
 }
 
 export async function POST(request: NextRequest) {
@@ -58,7 +89,8 @@ export async function POST(request: NextRequest) {
       'howItWorksClick',
       'directContestClick',
       'imageDownload',
-      'imageShare'
+      'imageShare',
+      'interaction' // New: combined download+share
     ]
 
     if (!event || !validEvents.includes(event)) {
@@ -66,6 +98,7 @@ export async function POST(request: NextRequest) {
     }
 
     const analytics = await readAnalytics()
+    const timestamp = new Date().toISOString()
 
     // Update the appropriate counter
     if (event === 'pageView') {
@@ -86,9 +119,17 @@ export async function POST(request: NextRequest) {
       analytics.imageDownloads += 1
     } else if (event === 'imageShare') {
       analytics.imageShares += 1
+    } else if (event === 'interaction') {
+      analytics.interactions += 1
     }
 
-    analytics.lastUpdated = new Date().toISOString()
+    // Add event to time-series array
+    analytics.events.push({
+      type: event,
+      timestamp
+    })
+
+    analytics.lastUpdated = timestamp
 
     await writeAnalytics(analytics)
 
