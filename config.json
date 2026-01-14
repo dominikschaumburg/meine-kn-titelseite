@@ -6,7 +6,10 @@
     "actionStart": "2026-01-13T00:00:00.000Z",
     "actionEnd": "2026-01-30T16:00:00.000Z",
     "moderationEnabled": false,
-    "formalAddress": true
+    "formalAddress": true,
+    "metaTitle": "Meine KN-Titelseite - Bring dein Selfie auf die Titelseite",
+    "metaDescription": "Erstelle deine personalisierte Kieler Nachrichten Titelseite! Lade ein Selfie hoch und werde Teil der KN.",
+    "socialShareImage": "/assets/share-image.jpg"
   },
   "security": {
     "doiSecret": "REPLACE_WITH_RANDOM_SECRET_ON_FIRST_RUN",
