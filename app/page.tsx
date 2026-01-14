@@ -697,7 +697,7 @@ export default function Home() {
         {currentStep === 'preview' && capturedImage && (
           <div className="max-w-md mx-auto text-center space-y-4 w-full flex flex-col h-full justify-center">
             <h2 className="text-xl md:text-2xl font-bold text-kn-dark">
-              {isDOICompleted ? '🎉 Deine KN-Titelseite' : '🔎 Deine KN-Titelseite'}
+              {isDOICompleted ? '🎉' : '🔎'} {appConfig?.whiteLabel?.formalAddress ? 'Ihre' : 'Deine'} KN-Titelseite
             </h2>
 
             <div className="relative bg-white rounded-lg shadow-lg overflow-hidden select-none flex-shrink-0 w-full aspect-square max-w-md mx-auto">
