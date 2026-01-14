@@ -26,6 +26,7 @@ export default function Home() {
   const [showActionEndedModal, setShowActionEndedModal] = useState(false)
   const [templateAspect, setTemplateAspect] = useState<number>(1.75) // Default to template aspect ratio
   const [appConfig, setAppConfig] = useState<any>(null)
+  const [showConfetti, setShowConfetti] = useState(false)
 
   // Calculate isActionActive from config dates
   const isActionActive = appConfig ? (() => {
@@ -443,6 +444,10 @@ export default function Home() {
         setDoiCode('')
         setDoiCodeError(null)
 
+        // Trigger confetti animation
+        setShowConfetti(true)
+        setTimeout(() => setShowConfetti(false), 3000)
+
         // Track DOI completion
         fetch('/api/analytics', {
           method: 'POST',
@@ -767,28 +772,16 @@ export default function Home() {
                 </p>
               </div>
             ) : (
-              <div className="bg-green-50 border border-green-400 text-green-800 p-4 rounded-lg">
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm md:text-base font-bold mb-2">
-                      Geschafft! {appConfig?.whiteLabel?.formalAddress ? 'Ihre' : 'Deine'} Titelseite ist freigeschaltet!
-                    </p>
-                    <p className="text-xs md:text-sm mb-3">
-                      {getText(appConfig, 'preview.completed.message')}
-                    </p>
-                    <p className="text-xs flex items-start gap-2">
-                      <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      </svg>
-                      <span>{getText(appConfig, 'preview.completed.share')} <strong>@kieler.nachrichten</strong></span>
-                    </p>
-                  </div>
-                </div>
+              <div className="bg-green-50 border border-green-400 text-green-800 p-4 rounded-lg text-center">
+                <p className="text-lg md:text-xl font-bold mb-2">
+                  Geschafft! {appConfig?.whiteLabel?.formalAddress ? 'Ihre' : 'Deine'} Titelseite ist freigeschaltet!
+                </p>
+                <p className="text-xs md:text-sm mb-3">
+                  {getText(appConfig, 'preview.completed.message')}
+                </p>
+                <p className="text-xs">
+                  {getText(appConfig, 'preview.completed.share')} <strong>@kieler.nachrichten</strong>
+                </p>
               </div>
             )}
 
@@ -805,7 +798,7 @@ export default function Home() {
                   {/* DOI Code Input */}
                   <div className="bg-gray-50 border border-gray-300 rounded-lg p-4">
                     <p className="text-xs text-gray-700 mb-2 font-medium">
-                      Code von der DOI-Seite erhalten?
+                      {appConfig?.whiteLabel?.formalAddress ? 'Haben Sie Ihren' : 'Hast du deinen'} 4-stelligen Freischaltcode erhalten? Gib ihn hier ein:
                     </p>
                     <div className="flex gap-2">
                       <input
@@ -1041,13 +1034,18 @@ export default function Home() {
                 </p>
               </div>
               <button
-                onClick={() => setShowOnboarding(false)}
+                onClick={() => {
+                  setShowOnboarding(false)
+                  // Trigger camera immediately
+                  setTimeout(() => triggerFileUpload(), 100)
+                }}
                 className="w-full bg-kn-blue text-white py-3 px-6 rounded-kn text-lg font-medium transition-colors flex items-center justify-center gap-2"
               >
-                Los geht's!
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
+                Foto aufnehmen
               </button>
             </div>
           </div>
@@ -1064,6 +1062,44 @@ export default function Home() {
           <a href="/impressum" className="hover:text-kn-light transition-colors">Impressum</a>
         </div>
       </footer>
+
+      {/* Confetti Animation */}
+      {showConfetti && (
+        <div className="fixed inset-0 pointer-events-none z-50">
+          {[...Array(50)].map((_, i) => (
+            <div
+              key={i}
+              className="confetti"
+              style={{
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 0.5}s`,
+                backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][Math.floor(Math.random() * 5)]
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes confetti-fall {
+          0% {
+            transform: translateY(-100vh) rotate(0deg);
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(100vh) rotate(360deg);
+            opacity: 0;
+          }
+        }
+
+        .confetti {
+          position: absolute;
+          width: 10px;
+          height: 10px;
+          top: -10px;
+          animation: confetti-fall 3s linear forwards;
+        }
+      `}</style>
     </div>
   )
 }
