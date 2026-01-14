@@ -111,13 +111,17 @@ export default function Home() {
         const doiCompleted = KNStorage.isDOICompleted()
         setIsDOICompleted(doiCompleted)
 
-        // If DOI was just completed via URL parameter, track it
+        // If DOI was just completed via URL parameter, track it (only once)
         if (doiParam && doiCompleted) {
-          fetch('/api/analytics', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ event: 'doiCompletion' })
-          }).catch(err => console.error('Analytics error:', err))
+          const doiTrackedKey = 'kn_doi_completion_tracked'
+          if (!sessionStorage.getItem(doiTrackedKey)) {
+            fetch('/api/analytics', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ event: 'doiCompletion' })
+            }).catch(err => console.error('Analytics error:', err))
+            sessionStorage.setItem(doiTrackedKey, 'true')
+          }
         }
       }
     }
@@ -126,12 +130,16 @@ export default function Home() {
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === 'KN_DOI_COMPLETED') {
         setIsDOICompleted(true)
-        // Track DOI completion
-        fetch('/api/analytics', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ event: 'doiCompletion' })
-        }).catch(err => console.error('Analytics error:', err))
+        // Track DOI completion (only once)
+        const doiTrackedKey = 'kn_doi_completion_tracked'
+        if (!sessionStorage.getItem(doiTrackedKey)) {
+          fetch('/api/analytics', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event: 'doiCompletion' })
+          }).catch(err => console.error('Analytics error:', err))
+          sessionStorage.setItem(doiTrackedKey, 'true')
+        }
       }
     }
 
@@ -146,12 +154,16 @@ export default function Home() {
     const checkDOIStatus = () => {
       if (KNStorage.isDOICompleted()) {
         setIsDOICompleted(true)
-        // Track DOI completion
-        fetch('/api/analytics', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ event: 'doiCompletion' })
-        }).catch(err => console.error('Analytics error:', err))
+        // Track DOI completion (only once)
+        const doiTrackedKey = 'kn_doi_completion_tracked'
+        if (!sessionStorage.getItem(doiTrackedKey)) {
+          fetch('/api/analytics', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event: 'doiCompletion' })
+          }).catch(err => console.error('Analytics error:', err))
+          sessionStorage.setItem(doiTrackedKey, 'true')
+        }
       }
     }
 
@@ -383,12 +395,16 @@ export default function Home() {
       KNStorage.markDOICompleted()
       setIsDOICompleted(true)
 
-      // Track DOI completion
-      fetch('/api/analytics', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event: 'doiCompletion' })
-      }).catch(err => console.error('Analytics error:', err))
+      // Track DOI completion (only once)
+      const doiTrackedKey = 'kn_doi_completion_tracked'
+      if (!sessionStorage.getItem(doiTrackedKey)) {
+        fetch('/api/analytics', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ event: 'doiCompletion' })
+        }).catch(err => console.error('Analytics error:', err))
+        sessionStorage.setItem(doiTrackedKey, 'true')
+      }
 
       return
     }
@@ -448,12 +464,16 @@ export default function Home() {
         setShowConfetti(true)
         setTimeout(() => setShowConfetti(false), 3000)
 
-        // Track DOI completion
-        fetch('/api/analytics', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ event: 'doiCompletion' })
-        }).catch(err => console.error('Analytics error:', err))
+        // Track DOI completion (only once)
+        const doiTrackedKey = 'kn_doi_completion_tracked'
+        if (!sessionStorage.getItem(doiTrackedKey)) {
+          fetch('/api/analytics', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event: 'doiCompletion' })
+          }).catch(err => console.error('Analytics error:', err))
+          sessionStorage.setItem(doiTrackedKey, 'true')
+        }
       } else {
         setDoiCodeError('Ungültiger Code. Bitte überprüfen Sie die Eingabe.')
       }
