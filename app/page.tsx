@@ -19,6 +19,9 @@ export default function Home() {
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isDOICompleted, setIsDOICompleted] = useState(false)
+  const [doiCode, setDoiCode] = useState('')
+  const [doiCodeError, setDoiCodeError] = useState<string | null>(null)
+  const [isValidatingCode, setIsValidatingCode] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [showActionEndedModal, setShowActionEndedModal] = useState(false)
   const [templateAspect, setTemplateAspect] = useState<number>(1.75) // Default to template aspect ratio
@@ -409,6 +412,54 @@ export default function Home() {
     window.open(registrationUrl, '_blank', 'width=800,height=600')
   }
 
+  const validateDoiCode = async () => {
+    if (!doiCode || doiCode.trim().length === 0) {
+      setDoiCodeError('Bitte geben Sie einen Code ein')
+      return
+    }
+
+    // Check format: 4 digits
+    if (!/^\d{4}$/.test(doiCode.trim())) {
+      setDoiCodeError('Der Code muss genau 4 Ziffern enthalten')
+      return
+    }
+
+    setIsValidatingCode(true)
+    setDoiCodeError(null)
+
+    try {
+      const response = await fetch('/api/doi-code/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: doiCode.trim() })
+      })
+
+      const result = await response.json()
+
+      if (result.valid) {
+        // Code is valid - unlock image
+        KNStorage.markDOICompleted()
+        setIsDOICompleted(true)
+        setDoiCode('')
+        setDoiCodeError(null)
+
+        // Track DOI completion
+        fetch('/api/analytics', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ event: 'doiCompletion' })
+        }).catch(err => console.error('Analytics error:', err))
+      } else {
+        setDoiCodeError('Ungültiger Code. Bitte überprüfen Sie die Eingabe.')
+      }
+    } catch (error) {
+      console.error('Code validation error:', error)
+      setDoiCodeError('Fehler bei der Validierung. Bitte versuchen Sie es erneut.')
+    } finally {
+      setIsValidatingCode(false)
+    }
+  }
+
   const downloadImage = async () => {
     if (capturedImage && isDOICompleted) {
       // Track download
@@ -704,6 +755,39 @@ export default function Home() {
                   >
                     {getText(appConfig, 'preview.doi.button')}
                   </button>
+
+                  {/* DOI Code Input */}
+                  <div className="bg-gray-50 border border-gray-300 rounded-lg p-4">
+                    <p className="text-xs text-gray-700 mb-2 font-medium">
+                      Code von der DOI-Seite erhalten?
+                    </p>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={doiCode}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '').slice(0, 4)
+                          setDoiCode(value)
+                          setDoiCodeError(null)
+                        }}
+                        placeholder="1234"
+                        maxLength={4}
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-center text-lg font-mono tracking-widest focus:ring-2 focus:ring-kn-blue focus:border-transparent"
+                        disabled={isValidatingCode}
+                      />
+                      <button
+                        onClick={validateDoiCode}
+                        disabled={isValidatingCode || doiCode.length !== 4}
+                        className="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                      >
+                        {isValidatingCode ? '⏳' : '✓'}
+                      </button>
+                    </div>
+                    {doiCodeError && (
+                      <p className="text-xs text-red-600 mt-2">{doiCodeError}</p>
+                    )}
+                  </div>
+
                   <button
                     onClick={resetApp}
                     className="w-full bg-gray-500 text-white py-3 px-4 rounded-kn font-medium transition-colors text-sm"
