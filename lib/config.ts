@@ -88,9 +88,9 @@ export function getDefaultConfig(): AppConfig {
       actionEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       moderationEnabled: true,
       formalAddress: false,
-      metaTitle: 'Meine Titelseite',
-      metaDescription: 'Erstelle deine personalisierte Titelseite',
-      socialShareImage: '/preview.gif'
+      metaTitle: 'Meine KN-Titelseite - Bring dein Selfie auf die Titelseite',
+      metaDescription: 'Erstelle deine personalisierte Kieler Nachrichten Titelseite! Lade ein Selfie hoch und werde Teil der KN.',
+      socialShareImage: '/assets/share-image.jpg'
     },
     security: {
       doiSecret: crypto.randomBytes(32).toString('hex'),

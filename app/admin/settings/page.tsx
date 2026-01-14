@@ -222,15 +222,15 @@ export default function SettingsPage() {
           {/* Social Share Image */}
           <div>
             <label htmlFor="socialShareImage" className="block text-sm font-medium text-gray-700 mb-2">
-              Social Share Bild (URL)
+              Social Share Bild
             </label>
             <input
-              type="url"
+              type="text"
               id="socialShareImage"
               value={config.socialShareImage || ''}
               onChange={(e) => setConfig({ ...config, socialShareImage: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="/preview.gif oder https://..."
+              placeholder="/assets/share-image.jpg"
             />
             <p className="text-sm text-gray-500 mt-1">
               Bild das beim Teilen auf Social Media angezeigt wird (empfohlen: 1200x630px)
