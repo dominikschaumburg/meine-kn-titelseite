@@ -5,15 +5,15 @@ export async function GET() {
   try {
     const template = await getRandomTemplate()
 
-    // Convert filesystem paths to public URL paths
+    // Use API endpoints to serve template assets
     let publicBackgroundPath: string | undefined
     if (template.backgroundPath) {
-      publicBackgroundPath = `/templates/${template.id}/background.png`
+      publicBackgroundPath = `/api/template-assets?id=${template.id}&type=background`
     }
 
     let publicForegroundPath: string | undefined
     if (template.foregroundPath) {
-      publicForegroundPath = `/templates/${template.id}/foreground.png`
+      publicForegroundPath = `/api/template-assets?id=${template.id}&type=foreground`
     }
 
     return NextResponse.json({
