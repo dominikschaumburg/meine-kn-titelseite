@@ -2,14 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/admin/AuthProvider'
-
-interface WhiteLabelConfig {
-  contestPrize: string
-  doiUrl: string
-  actionStart: string
-  actionEnd: string
-  moderationEnabled: boolean
-}
+import { WhiteLabelConfig } from '@/lib/config'
 
 export default function SettingsPage() {
   const { password } = useAuth()

@@ -8,6 +8,7 @@ export interface WhiteLabelConfig {
   actionStart: string
   actionEnd: string
   moderationEnabled: boolean
+  formalAddress: boolean
 }
 
 export interface SecurityConfig {
@@ -82,7 +83,8 @@ export function getDefaultConfig(): AppConfig {
       doiUrl: '',
       actionStart: new Date().toISOString(),
       actionEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      moderationEnabled: true
+      moderationEnabled: true,
+      formalAddress: false
     },
     security: {
       doiSecret: crypto.randomBytes(32).toString('hex'),
