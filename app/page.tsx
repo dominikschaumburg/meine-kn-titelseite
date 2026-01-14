@@ -467,11 +467,17 @@ export default function Home() {
 
   const downloadImage = async () => {
     if (capturedImage && isDOICompleted) {
-      // Track download
+      // Track download and interaction
       fetch('/api/analytics', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ event: 'imageDownload' })
+      }).catch(err => console.error('Analytics error:', err))
+
+      fetch('/api/analytics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'interaction' })
       }).catch(err => console.error('Analytics error:', err))
 
       // Detect iOS
@@ -507,11 +513,17 @@ export default function Home() {
 
   const shareImage = async () => {
     if (capturedImage && isDOICompleted && navigator.share) {
-      // Track share
+      // Track share and interaction
       fetch('/api/analytics', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ event: 'imageShare' })
+      }).catch(err => console.error('Analytics error:', err))
+
+      fetch('/api/analytics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'interaction' })
       }).catch(err => console.error('Analytics error:', err))
 
       try {

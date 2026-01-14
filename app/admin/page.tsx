@@ -2,6 +2,11 @@
 
 import { useState, useEffect } from 'react'
 
+interface AnalyticsEvent {
+  type: string
+  timestamp: string
+}
+
 interface Analytics {
   pageViews: number
   photoUploads: number
@@ -10,11 +15,13 @@ interface Analytics {
   moderationFlagged: number
   interactions: number
   lastUpdated: string
+  events: AnalyticsEvent[]
 }
 
 export default function AdminDashboard() {
   const [analytics, setAnalytics] = useState<Analytics | null>(null)
   const [loading, setLoading] = useState(true)
+  const [resetting, setResetting] = useState(false)
 
   useEffect(() => {
     fetchAnalytics()
@@ -32,6 +39,91 @@ export default function AdminDashboard() {
       console.error('Failed to fetch analytics:', error)
       setLoading(false)
     }
+  }
+
+  const resetAnalytics = async () => {
+    if (!confirm('Möchten Sie wirklich alle Analytics-Daten zurücksetzen? Diese Aktion kann nicht rückgängig gemacht werden.')) {
+      return
+    }
+
+    setResetting(true)
+    try {
+      const password = localStorage.getItem('admin_password')
+      const response = await fetch('/api/analytics/reset', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${password}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        await fetchAnalytics()
+        alert('Analytics erfolgreich zurückgesetzt!')
+      } else {
+        alert('Fehler beim Zurücksetzen der Analytics')
+      }
+    } catch (error) {
+      console.error('Failed to reset analytics:', error)
+      alert('Fehler beim Zurücksetzen der Analytics')
+    } finally {
+      setResetting(false)
+    }
+  }
+
+  const getHourlyData = () => {
+    if (!analytics || !analytics.events) return []
+
+    const now = Date.now()
+    const sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000)
+
+    // Filter last 7 days page views
+    const pageViewEvents = analytics.events.filter(e =>
+      e.type === 'pageView' && new Date(e.timestamp).getTime() > sevenDaysAgo
+    )
+
+    // Group by hour
+    const hourlyMap: Record<string, number> = {}
+    pageViewEvents.forEach(event => {
+      const date = new Date(event.timestamp)
+      const hourKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:00`
+      hourlyMap[hourKey] = (hourlyMap[hourKey] || 0) + 1
+    })
+
+    return Object.entries(hourlyMap)
+      .map(([hour, count]) => ({ hour, count }))
+      .sort((a, b) => a.hour.localeCompare(b.hour))
+  }
+
+  const getDailyData = () => {
+    if (!analytics || !analytics.events) return []
+
+    const now = Date.now()
+    const sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000)
+
+    // Filter last 7 days page views
+    const pageViewEvents = analytics.events.filter(e =>
+      e.type === 'pageView' && new Date(e.timestamp).getTime() > sevenDaysAgo
+    )
+
+    // Group by day
+    const dailyMap: Record<string, number> = {}
+    pageViewEvents.forEach(event => {
+      const date = new Date(event.timestamp)
+      const dayKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+      dailyMap[dayKey] = (dailyMap[dayKey] || 0) + 1
+    })
+
+    // Ensure all 7 days are present
+    const result = []
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(now - (i * 24 * 60 * 60 * 1000))
+      const dayKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+      const dayLabel = date.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })
+      result.push({ day: dayLabel, count: dailyMap[dayKey] || 0 })
+    }
+
+    return result
   }
 
   if (loading) {
@@ -62,14 +154,73 @@ export default function AdminDashboard() {
     { label: 'Moderation: Abgelehnt', value: analytics.moderationFlagged, color: 'red' },
   ]
 
+  const hourlyData = getHourlyData()
+  const dailyData = getDailyData()
+  const maxDaily = Math.max(...dailyData.map(d => d.count), 1)
+
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-semibold text-gray-900">Dashboard</h1>
-        <p className="text-gray-500 mt-2">
-          Zuletzt aktualisiert: {new Date(analytics.lastUpdated).toLocaleString('de-DE')}
-        </p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-semibold text-gray-900">Dashboard</h1>
+          <p className="text-gray-500 mt-2">
+            Zuletzt aktualisiert: {new Date(analytics.lastUpdated).toLocaleString('de-DE')}
+          </p>
+        </div>
+        <button
+          onClick={resetAnalytics}
+          disabled={resetting}
+          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+        >
+          {resetting ? 'Zurücksetzen...' : 'Analytics zurücksetzen'}
+        </button>
       </div>
+
+      {/* Daily Chart */}
+      <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mb-8">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Seitenaufrufe (Letzte 7 Tage)</h2>
+        <div className="flex items-end gap-2 h-48">
+          {dailyData.map((day, i) => (
+            <div key={i} className="flex-1 flex flex-col items-center">
+              <div className="flex-1 flex items-end w-full">
+                <div
+                  className="w-full bg-blue-500 rounded-t transition-all hover:bg-blue-600"
+                  style={{ height: `${(day.count / maxDaily) * 100}%` }}
+                  title={`${day.day}: ${day.count} Aufrufe`}
+                />
+              </div>
+              <div className="mt-2 text-xs text-gray-600 text-center">{day.day}</div>
+              <div className="text-xs font-semibold text-gray-900">{day.count}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Hourly Stats */}
+      {hourlyData.length > 0 && (
+        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Stündliche Aufrufe (Letzte 7 Tage)</h2>
+          <div className="max-h-64 overflow-y-auto">
+            <table className="min-w-full">
+              <thead className="bg-gray-50 sticky top-0">
+                <tr>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Zeitpunkt</th>
+                  <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Aufrufe</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {hourlyData.slice(-24).map((data, i) => (
+                  <tr key={i}>
+                    <td className="px-4 py-2 text-sm text-gray-900">{data.hour}</td>
+                    <td className="px-4 py-2 text-sm text-gray-900 text-right font-medium">{data.count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {metrics.map((metric) => (
