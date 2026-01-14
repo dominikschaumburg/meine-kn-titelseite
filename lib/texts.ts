@@ -81,11 +81,12 @@ export function getText(config: any, key: keyof TextKeys): string {
   const textSet = formal ? texts.sie : texts.du
 
   // Check if this key has contest-specific variants
-  const contestVariantKeys = ['intro.step2', 'preview.doi.instruction', 'preview.doi.button']
+  const contestVariantKeys: Array<keyof TextKeys> = ['intro.step2', 'preview.doi.instruction', 'preview.doi.button']
   if (contestVariantKeys.includes(key)) {
     const variant = hasContest ? textSet.withContest : textSet.withoutContest
-    return variant[key] || textSet[key] || key
+    const contestKey = key as 'intro.step2' | 'preview.doi.instruction' | 'preview.doi.button'
+    return variant[contestKey] || (textSet as any)[key] || key
   }
 
-  return textSet[key] || key
+  return (textSet as any)[key] || key
 }
