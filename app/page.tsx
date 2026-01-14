@@ -798,7 +798,9 @@ export default function Home() {
                   {/* DOI Code Input */}
                   <div className="bg-gray-50 border border-gray-300 rounded-lg p-4">
                     <p className="text-xs text-gray-700 mb-2 font-medium">
-                      {appConfig?.whiteLabel?.formalAddress ? 'Haben Sie Ihren' : 'Hast du deinen'} 4-stelligen Freischaltcode erhalten? Gib ihn hier ein:
+                      {appConfig?.whiteLabel?.formalAddress
+                        ? 'Haben Sie Ihren 4-stelligen Freischaltcode erhalten? Geben Sie ihn hier ein:'
+                        : 'Hast du deinen 4-stelligen Freischaltcode erhalten? Gib ihn hier ein:'}
                     </p>
                     <div className="flex gap-2">
                       <input
