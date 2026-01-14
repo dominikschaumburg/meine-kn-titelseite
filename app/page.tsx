@@ -631,14 +631,20 @@ export default function Home() {
         {currentStep === 'crop' && uploadedImage && (
           <div className="w-full max-w-4xl mx-auto flex flex-col h-full">
             <div className="text-center mb-3">
-              <h2 className="text-xl md:text-2xl font-bold text-kn-dark">
-                ✂️ Foto zuschneiden
+              <h2 className="text-xl md:text-2xl font-bold text-kn-dark flex items-center justify-center gap-2">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
+                </svg>
+                Foto zuschneiden
               </h2>
             </div>
 
             <div className="bg-blue-50 border border-blue-200 text-blue-800 p-2 rounded-lg mb-3">
-              <p className="text-xs md:text-sm">
-                📏 {getText(appConfig, 'crop.instruction')}
+              <p className="text-xs md:text-sm flex items-center gap-2">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {getText(appConfig, 'crop.instruction')}
               </p>
             </div>
 
@@ -666,9 +672,12 @@ export default function Home() {
             <div className="flex space-x-4 mb-2">
               <button
                 onClick={resetApp}
-                className="flex-1 bg-gray-500 text-white py-3 px-4 md:px-6 rounded-kn font-medium transition-colors text-sm md:text-base"
+                className="flex-1 bg-gray-500 text-white py-3 px-4 md:px-6 rounded-kn font-medium transition-colors text-sm md:text-base flex items-center justify-center gap-2"
               >
-                ✖️ Abbrechen
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Abbrechen
               </button>
               <button
                 onClick={processCroppedImage}
@@ -696,8 +705,17 @@ export default function Home() {
         {/* Preview Step */}
         {currentStep === 'preview' && capturedImage && (
           <div className="max-w-md mx-auto text-center space-y-4 w-full flex flex-col h-full justify-center">
-            <h2 className="text-xl md:text-2xl font-bold text-kn-dark">
-              {isDOICompleted ? '🎉' : '🔎'} {appConfig?.whiteLabel?.formalAddress ? 'Ihre' : 'Deine'} KN-Titelseite
+            <h2 className="text-xl md:text-2xl font-bold text-kn-dark flex items-center justify-center gap-2">
+              {isDOICompleted ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              )}
+              {appConfig?.whiteLabel?.formalAddress ? 'Ihre' : 'Deine'} KN-Titelseite
             </h2>
 
             <div className="relative bg-white rounded-lg shadow-lg overflow-hidden select-none flex-shrink-0 w-full aspect-square max-w-md mx-auto">
@@ -730,18 +748,29 @@ export default function Home() {
 
             {!isDOICompleted ? (
               <div className="bg-yellow-50 border border-yellow-400 text-yellow-800 p-3 rounded-lg">
-                <p className="text-xs md:text-sm font-medium mb-1">
-                  🎁 📧 {getText(appConfig, 'preview.doi.instruction')}
+                <p className="text-xs md:text-sm font-medium mb-1 flex items-center gap-2">
+                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  {getText(appConfig, 'preview.doi.instruction')}
                 </p>
               </div>
             ) : (
               <div className="bg-green-50 border border-green-400 text-green-800 p-3 rounded-lg">
-                <p className="text-xs md:text-sm font-medium">
-                  ✅ Geschafft! {appConfig?.whiteLabel?.formalAddress ? 'Ihre' : 'Deine'} Titelseite ist freigeschaltet! <br/>
-                  {getText(appConfig, 'preview.completed.message')}
+                <p className="text-xs md:text-sm font-medium flex items-center gap-2">
+                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>
+                    Geschafft! {appConfig?.whiteLabel?.formalAddress ? 'Ihre' : 'Deine'} Titelseite ist freigeschaltet! <br/>
+                    {getText(appConfig, 'preview.completed.message')}
+                  </span>
                 </p>
-                <p className="text-xs mt-2">
-                📱 {getText(appConfig, 'preview.completed.share')} <strong>@kieler.nachrichten</strong>
+                <p className="text-xs mt-2 flex items-center gap-2">
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  {getText(appConfig, 'preview.completed.share')} <strong>@kieler.nachrichten</strong>
                 </p>
               </div>
             )}
@@ -778,9 +807,17 @@ export default function Home() {
                       <button
                         onClick={validateDoiCode}
                         disabled={isValidatingCode || doiCode.length !== 4}
-                        className="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                        className="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
                       >
-                        {isValidatingCode ? '⏳' : '✓'}
+                        {isValidatingCode ? (
+                          <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          </svg>
+                        ) : (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
                       </button>
                     </div>
                     {doiCodeError && (
@@ -790,9 +827,12 @@ export default function Home() {
 
                   <button
                     onClick={resetApp}
-                    className="w-full bg-gray-400 text-white py-2 px-3 rounded-kn font-normal transition-colors text-xs hover:bg-gray-500"
+                    className="w-full bg-gray-400 text-white py-2 px-3 rounded-kn font-normal transition-colors text-xs hover:bg-gray-500 flex items-center justify-center gap-2"
                   >
-                    🔄 Neues Foto
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Neues Foto
                   </button>
                 </div>
               ) : (
@@ -800,22 +840,31 @@ export default function Home() {
                   <div className="flex space-x-3">
                     <button
                       onClick={downloadImage}
-                      className="flex-1 bg-kn-blue text-white py-3 px-4 rounded-kn font-medium transition-colors text-sm"
+                      className="flex-1 bg-kn-blue text-white py-3 px-4 rounded-kn font-medium transition-colors text-sm flex items-center justify-center gap-2"
                     >
-                      💾 Speichern
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      Speichern
                     </button>
                     <button
                       onClick={shareImage}
-                      className="flex-1 bg-kn-blue text-white py-3 px-4 rounded-kn font-medium transition-colors text-sm"
+                      className="flex-1 bg-kn-blue text-white py-3 px-4 rounded-kn font-medium transition-colors text-sm flex items-center justify-center gap-2"
                     >
-                      🔗 Teilen
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                      </svg>
+                      Teilen
                     </button>
                   </div>
                   <button
                     onClick={resetApp}
-                    className="w-full bg-kn-blue text-white py-2 px-4 rounded-kn font-medium transition-colors text-sm"
+                    className="w-full bg-kn-blue text-white py-2 px-4 rounded-kn font-medium transition-colors text-sm flex items-center justify-center gap-2"
                   >
-                    🔄 Neue Titelseite erstellen
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Neue Titelseite erstellen
                   </button>
                 </>
               )}
@@ -883,7 +932,13 @@ export default function Home() {
                   1
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-kn-dark mb-2">📸 Foto aufnehmen</h3>
+                  <h3 className="text-xl font-bold text-kn-dark mb-2 flex items-center gap-2">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Foto aufnehmen
+                  </h3>
                   <p className="text-gray-700">
                     {getText(appConfig, 'intro.step1')}
                   </p>
@@ -896,7 +951,12 @@ export default function Home() {
                   2
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-kn-dark mb-2">✂️ Foto zuschneiden</h3>
+                  <h3 className="text-xl font-bold text-kn-dark mb-2 flex items-center gap-2">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
+                    </svg>
+                    Foto zuschneiden
+                  </h3>
                   <p className="text-gray-700">
                     Passe den Bildausschnitt an.
                   </p>
@@ -909,7 +969,18 @@ export default function Home() {
                   3
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-kn-dark mb-2">🎁 {appConfig?.whiteLabel?.contestPrize ? 'Gewinnspiel & Freischalten' : 'Freischalten'}</h3>
+                  <h3 className="text-xl font-bold text-kn-dark mb-2 flex items-center gap-2">
+                    {appConfig?.whiteLabel?.contestPrize ? (
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                      </svg>
+                    ) : (
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                      </svg>
+                    )}
+                    {appConfig?.whiteLabel?.contestPrize ? 'Gewinnspiel & Freischalten' : 'Freischalten'}
+                  </h3>
                   <p className="text-gray-700">
                     {getText(appConfig, 'intro.step2')}{appConfig?.whiteLabel?.contestPrize && <>. Gewinne <strong className="font-bold text-kn-dark">{appConfig.whiteLabel.contestPrize}</strong></>}!
                   </p>
@@ -922,7 +993,12 @@ export default function Home() {
                   4
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-kn-dark mb-2">💾 Speichern & Teilen</h3>
+                  <h3 className="text-xl font-bold text-kn-dark mb-2 flex items-center gap-2">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                    Speichern & Teilen
+                  </h3>
                   <p className="text-gray-700">
                     {getText(appConfig, 'intro.step3')}
                   </p>
@@ -932,20 +1008,29 @@ export default function Home() {
 
             <div className="mt-8 pt-6 border-t border-gray-200">
               <div className="bg-green-50 border border-green-200 text-green-800 p-3 rounded-lg mb-4">
-                <p className="text-xs">
-                  <strong>🔒 Privat & sicher:</strong> {getText(appConfig, 'intro.privacy')}
+                <p className="text-xs flex items-center gap-2">
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <span><strong>Privat & sicher:</strong> {getText(appConfig, 'intro.privacy')}</span>
                 </p>
               </div>
               <div className="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-lg mb-4">
-                <p className="text-xs">
-                  <strong>⚠️ Hinweis:</strong> Bitte verwende keinen Inkognito-Modus, da dies zu Problemen führen kann.
+                <p className="text-xs flex items-center gap-2">
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <span><strong>Hinweis:</strong> Bitte verwende keinen Inkognito-Modus, da dies zu Problemen führen kann.</span>
                 </p>
               </div>
               <button
                 onClick={() => setShowOnboarding(false)}
-                className="w-full bg-kn-blue text-white py-3 px-6 rounded-kn text-lg font-medium transition-colors"
+                className="w-full bg-kn-blue text-white py-3 px-6 rounded-kn text-lg font-medium transition-colors flex items-center justify-center gap-2"
               >
-                Los geht's! 🚀
+                Los geht's!
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
               </button>
             </div>
           </div>

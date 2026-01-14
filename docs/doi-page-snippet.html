@@ -29,6 +29,27 @@
     color: #1f2937;
   }
 
+  /* Dark mode support */
+  @media (prefers-color-scheme: dark) {
+    .kn-code-digit {
+      background: #374151;
+      border-color: #4b5563;
+      color: #f9fafb;
+    }
+
+    .kn-doi-container h2 {
+      color: #f9fafb !important;
+    }
+
+    .kn-doi-container p {
+      color: #d1d5db !important;
+    }
+
+    .kn-instructions li {
+      color: #d1d5db !important;
+    }
+  }
+
   .kn-code-digit.loading {
     animation: pulse 1.5s ease-in-out infinite;
   }
@@ -83,8 +104,8 @@
   .kn-instructions li {
     counter-increment: step-counter;
     position: relative;
-    padding-left: 35px;
-    margin-bottom: 12px;
+    padding-left: 40px;
+    margin-bottom: 16px;
     color: #4b5563;
     line-height: 1.6;
   }
@@ -93,26 +114,29 @@
     content: counter(step-counter);
     position: absolute;
     left: 0;
-    top: 0;
+    top: 50%;
+    transform: translateY(-50%);
     background: #2563eb;
     color: white;
-    min-width: 24px;
-    width: 24px;
-    height: 24px;
-    min-height: 24px;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
     border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    text-align: center;
     font-weight: 700;
     font-size: 14px;
-    flex-shrink: 0;
   }
 
   .kn-error {
     color: #dc2626;
     font-size: 14px;
     margin-top: 10px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .kn-error {
+      color: #fca5a5;
+    }
   }
 </style>
 
@@ -153,7 +177,7 @@
     const sessionId = params.get('session_id') || `doi-${Date.now()}`
 
     // WICHTIG: Ersetze diese URL mit deiner tatsächlichen Domain
-    const API_URL = 'https://ihre-domain.de/api/doi-code/generate'
+    const API_URL = 'https://kn.meine-titelseite.de/api/doi-code/generate'
 
     // API-Aufruf zur Code-Generierung
     const response = await fetch(API_URL, {
@@ -195,28 +219,27 @@
     console.error('Fehler beim Laden des Codes:', error)
     const digitElements = codeDisplay.querySelectorAll('.kn-code-digit')
     digitElements.forEach(el => {
-      el.textContent = '✗'
+      el.innerHTML = '<svg style="width: 24px; height: 24px; margin: auto;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>'
       el.classList.remove('loading')
-      el.style.fontSize = '24px'
     })
     errorElement.textContent = 'Fehler beim Laden des Codes. Bitte kontaktieren Sie den Support.'
     errorElement.style.display = 'block'
   }
 
-  // Copy-Button Handler
+  // Copy-Button Handler (OHNE automatische Weiterleitung)
   copyButton.addEventListener('click', async function() {
     if (!generatedCode) return
 
     try {
       await navigator.clipboard.writeText(generatedCode)
-      this.textContent = '✓ Kopiert!'
+      this.innerHTML = '<svg style="width: 20px; height: 20px; display: inline-block; vertical-align: middle; margin-right: 8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> Kopiert!'
       this.classList.add('copied')
 
-      // Nach erfolgreichem Kopieren zur Titelseiten-App weiterleiten
+      // Zurücksetzen nach 2 Sekunden
       setTimeout(() => {
-        // WICHTIG: Passe diese URL an deine tatsächliche Titelseiten-URL an
-        window.location.href = 'https://kn.meine-titelseite.de/'
-      }, 1000)
+        this.textContent = 'Code kopieren'
+        this.classList.remove('copied')
+      }, 2000)
     } catch (error) {
       // Fallback: Zeige Hinweis
       this.textContent = 'Bitte manuell kopieren (Strg+C / Cmd+C)'

@@ -404,7 +404,12 @@ export default function TemplateConfigPage() {
             </div>
 
             <div className="border-t border-gray-200 pt-6">
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">🎯 So funktioniert's</h3>
+              <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                So funktioniert's
+              </h3>
               <div className="space-y-2 text-xs text-gray-600">
                 <div className="flex items-start gap-2">
                   <span className="text-blue-600 font-bold">•</span>
@@ -486,9 +491,12 @@ export default function TemplateConfigPage() {
               <button
                 onClick={saveConfigToServer}
                 disabled={isSaving}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-semibold transition-colors shadow-sm"
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-semibold transition-colors shadow-sm flex items-center justify-center gap-2"
               >
-                {isSaving ? '💾 Speichert...' : '💾 Konfiguration speichern'}
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
+                {isSaving ? 'Speichert...' : 'Konfiguration speichern'}
               </button>
 
               {saveMessage && (
