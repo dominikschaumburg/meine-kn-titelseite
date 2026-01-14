@@ -31,6 +31,10 @@
 
   /* Dark mode support */
   @media (prefers-color-scheme: dark) {
+    .kn-doi-container {
+      background: transparent;
+    }
+
     .kn-code-digit {
       background: #374151;
       border-color: #4b5563;
@@ -45,8 +49,20 @@
       color: #d1d5db !important;
     }
 
-    .kn-instructions li {
+    .kn-instruction-text {
       color: #d1d5db !important;
+    }
+
+    .kn-copy-btn {
+      background: #3b82f6;
+    }
+
+    .kn-copy-btn:hover {
+      background: #2563eb;
+    }
+
+    .kn-copy-btn.copied {
+      background: #10b981;
     }
   }
 
@@ -94,37 +110,40 @@
     margin-top: 30px;
   }
 
-  .kn-instructions ol {
+  .kn-instructions-list {
     list-style: none;
-    counter-reset: step-counter;
     padding: 0;
     margin: 15px 0;
   }
 
-  .kn-instructions li {
-    counter-increment: step-counter;
-    position: relative;
-    padding-left: 40px;
+  .kn-instruction-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
     margin-bottom: 16px;
-    color: #4b5563;
-    line-height: 1.6;
   }
 
-  .kn-instructions li::before {
-    content: counter(step-counter);
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
+  .kn-step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
     background: #2563eb;
     color: white;
     width: 28px;
     height: 28px;
-    line-height: 28px;
+    min-width: 28px;
+    min-height: 28px;
     border-radius: 50%;
-    text-align: center;
     font-weight: 700;
     font-size: 14px;
+  }
+
+  .kn-instruction-text {
+    color: #4b5563;
+    line-height: 1.6;
+    flex: 1;
+    padding-top: 4px;
   }
 
   .kn-error {
@@ -154,11 +173,20 @@
   <button class="kn-copy-btn" id="kn-copy-btn" disabled>Code kopieren</button>
 
   <div class="kn-instructions">
-    <ol>
-      <li>Kehren Sie zur Titelseiten-App zurück</li>
-      <li>Geben Sie dort diesen 4-stelligen Code ein</li>
-      <li>Ihre Titelseite wird sofort freigeschaltet</li>
-    </ol>
+    <div class="kn-instructions-list">
+      <div class="kn-instruction-item">
+        <div class="kn-step-number">1</div>
+        <div class="kn-instruction-text">Kehren Sie zur Titelseiten-App zurück</div>
+      </div>
+      <div class="kn-instruction-item">
+        <div class="kn-step-number">2</div>
+        <div class="kn-instruction-text">Geben Sie dort diesen 4-stelligen Code ein</div>
+      </div>
+      <div class="kn-instruction-item">
+        <div class="kn-step-number">3</div>
+        <div class="kn-instruction-text">Ihre Titelseite wird sofort freigeschaltet</div>
+      </div>
+    </div>
   </div>
 
   <div id="kn-error-message" class="kn-error" style="display: none;"></div>

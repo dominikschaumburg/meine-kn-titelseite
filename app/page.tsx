@@ -609,9 +609,13 @@ export default function Home() {
               <button
                 onClick={triggerFileUpload}
                 disabled={!acceptedTerms}
-                className="w-full bg-kn-blue text-white py-4 px-6 rounded-kn text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full bg-kn-blue text-white py-4 px-6 rounded-kn text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-3"
               >
-              📸 Foto aufnehmen
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Foto aufnehmen
               </button>
 
             </div>
@@ -692,7 +696,14 @@ export default function Home() {
                     </svg>
                     Verarbeite...
                   </span>
-                ) : '✅ Foto verwenden'}
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Foto verwenden
+                  </span>
+                )}
               </button>
             </div>
 
@@ -756,22 +767,28 @@ export default function Home() {
                 </p>
               </div>
             ) : (
-              <div className="bg-green-50 border border-green-400 text-green-800 p-3 rounded-lg">
-                <p className="text-xs md:text-sm font-medium flex items-center gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>
-                    Geschafft! {appConfig?.whiteLabel?.formalAddress ? 'Ihre' : 'Deine'} Titelseite ist freigeschaltet! <br/>
-                    {getText(appConfig, 'preview.completed.message')}
-                  </span>
-                </p>
-                <p className="text-xs mt-2 flex items-center gap-2">
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
-                  {getText(appConfig, 'preview.completed.share')} <strong>@kieler.nachrichten</strong>
-                </p>
+              <div className="bg-green-50 border border-green-400 text-green-800 p-4 rounded-lg">
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0">
+                    <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm md:text-base font-bold mb-2">
+                      Geschafft! {appConfig?.whiteLabel?.formalAddress ? 'Ihre' : 'Deine'} Titelseite ist freigeschaltet!
+                    </p>
+                    <p className="text-xs md:text-sm mb-3">
+                      {getText(appConfig, 'preview.completed.message')}
+                    </p>
+                    <p className="text-xs flex items-start gap-2">
+                      <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                      <span>{getText(appConfig, 'preview.completed.share')} <strong>@kieler.nachrichten</strong></span>
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
 
