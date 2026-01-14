@@ -183,6 +183,60 @@ export default function SettingsPage() {
             </p>
           </div>
 
+          {/* Meta Title */}
+          <div>
+            <label htmlFor="metaTitle" className="block text-sm font-medium text-gray-700 mb-2">
+              Meta-Titel
+            </label>
+            <input
+              type="text"
+              id="metaTitle"
+              value={config.metaTitle || ''}
+              onChange={(e) => setConfig({ ...config, metaTitle: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Meine Titelseite"
+            />
+            <p className="text-sm text-gray-500 mt-1">
+              Titel für Browser-Tab und Suchmaschinen
+            </p>
+          </div>
+
+          {/* Meta Description */}
+          <div>
+            <label htmlFor="metaDescription" className="block text-sm font-medium text-gray-700 mb-2">
+              Meta-Beschreibung
+            </label>
+            <textarea
+              id="metaDescription"
+              value={config.metaDescription || ''}
+              onChange={(e) => setConfig({ ...config, metaDescription: e.target.value })}
+              rows={3}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Erstelle deine personalisierte Titelseite"
+            />
+            <p className="text-sm text-gray-500 mt-1">
+              Beschreibung für Suchmaschinen und Social Media (max. 160 Zeichen)
+            </p>
+          </div>
+
+          {/* Social Share Image */}
+          <div>
+            <label htmlFor="socialShareImage" className="block text-sm font-medium text-gray-700 mb-2">
+              Social Share Bild (URL)
+            </label>
+            <input
+              type="url"
+              id="socialShareImage"
+              value={config.socialShareImage || ''}
+              onChange={(e) => setConfig({ ...config, socialShareImage: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="/preview.gif oder https://..."
+            />
+            <p className="text-sm text-gray-500 mt-1">
+              Bild das beim Teilen auf Social Media angezeigt wird (empfohlen: 1200x630px)
+            </p>
+          </div>
+
           {/* Message */}
           {message && (
             <div

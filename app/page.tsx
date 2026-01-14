@@ -790,7 +790,7 @@ export default function Home() {
 
                   <button
                     onClick={resetApp}
-                    className="w-full bg-gray-500 text-white py-3 px-4 rounded-kn font-medium transition-colors text-sm"
+                    className="w-full bg-gray-400 text-white py-2 px-3 rounded-kn font-normal transition-colors text-xs hover:bg-gray-500"
                   >
                     🔄 Neues Foto
                   </button>

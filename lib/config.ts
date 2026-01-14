@@ -9,6 +9,9 @@ export interface WhiteLabelConfig {
   actionEnd: string
   moderationEnabled: boolean
   formalAddress: boolean
+  metaTitle: string
+  metaDescription: string
+  socialShareImage: string
 }
 
 export interface SecurityConfig {
@@ -84,7 +87,10 @@ export function getDefaultConfig(): AppConfig {
       actionStart: new Date().toISOString(),
       actionEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       moderationEnabled: true,
-      formalAddress: false
+      formalAddress: false,
+      metaTitle: 'Meine Titelseite',
+      metaDescription: 'Erstelle deine personalisierte Titelseite',
+      socialShareImage: '/preview.gif'
     },
     security: {
       doiSecret: crypto.randomBytes(32).toString('hex'),

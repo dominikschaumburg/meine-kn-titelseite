@@ -209,10 +209,11 @@
       this.textContent = '✓ Kopiert!'
       this.classList.add('copied')
 
+      // Nach erfolgreichem Kopieren zur Titelseiten-App weiterleiten
       setTimeout(() => {
-        this.textContent = 'Code kopieren'
-        this.classList.remove('copied')
-      }, 2000)
+        // WICHTIG: Passe diese URL an deine tatsächliche Titelseiten-URL an
+        window.location.href = 'https://kn.meine-titelseite.de/'
+      }, 1000)
     } catch (error) {
       // Fallback: Zeige Hinweis
       this.textContent = 'Bitte manuell kopieren (Strg+C / Cmd+C)'

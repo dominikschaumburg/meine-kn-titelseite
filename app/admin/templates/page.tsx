@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { UserImagePosition, TemplateConfig } from '@/lib/templates'
+import { useAuth } from '@/components/admin/AuthProvider'
 
 interface DragState {
   isDragging: boolean
@@ -14,6 +15,7 @@ interface DragState {
 }
 
 export default function TemplateConfigPage() {
+  const { password } = useAuth()
   const [templateId, setTemplateId] = useState('1')
   const [availableTemplates, setAvailableTemplates] = useState<string[]>([])
   const [sampleImageUrl, setSampleImageUrl] = useState<string>('/assets/sample-user.jpg')
@@ -210,8 +212,6 @@ export default function TemplateConfigPage() {
         description: `Template ${templateId} Konfiguration`
       }
 
-      const password = localStorage.getItem('admin_password')
-
       const response = await fetch('/api/template-config/save', {
         method: 'POST',
         headers: {
@@ -261,7 +261,6 @@ export default function TemplateConfigPage() {
       if (backgroundFile) formData.append('background', backgroundFile)
       if (foregroundFile) formData.append('foreground', foregroundFile)
 
-      const password = localStorage.getItem('admin_password')
       const response = await fetch('/api/templates/upload', {
         method: 'POST',
         headers: {
