@@ -1002,7 +1002,7 @@ export default function Home() {
                     Foto zuschneiden
                   </h3>
                   <p className="text-gray-700">
-                    Passe den Bildausschnitt an.
+                    {getText(appConfig, 'crop.instruction')}
                   </p>
                 </div>
               </div>

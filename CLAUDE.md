@@ -42,7 +42,11 @@ Central configuration in `config.json` (root directory):
     "doiUrl": "https://...",
     "actionStart": "2026-01-15T00:00:00.000Z",
     "actionEnd": "2026-02-15T23:59:59.999Z",
-    "moderationEnabled": true
+    "moderationEnabled": true,
+    "formalAddress": false,
+    "metaTitle": "Meine KN-Titelseite - Bring dein Selfie auf die Titelseite",
+    "metaDescription": "Erstelle deine personalisierte Kieler Nachrichten Titelseite!",
+    "socialShareImage": "/assets/share-image.jpg"
   },
   "security": {
     "doiSecret": "auto-generated",
@@ -56,6 +60,14 @@ Central configuration in `config.json` (root directory):
 - Managed via Admin UI at `/admin/settings`
 - API: `GET/POST /api/config` ([app/api/config/route.ts](app/api/config/route.ts))
 - Loader: [lib/config.ts](lib/config.ts)
+
+**White-Label Fields:**
+- `contestPrize`: Prize description (empty = no contest mode)
+- `doiUrl`: External DOI page URL (empty = direct code generation)
+- `actionStart`/`actionEnd`: Campaign date range (ISO 8601)
+- `moderationEnabled`: Toggle content moderation on/off
+- `formalAddress`: Toggle formal "Sie" vs informal "du" in UI text ([lib/texts.ts](lib/texts.ts))
+- `metaTitle`/`metaDescription`/`socialShareImage`: SEO and social media metadata
 
 ### Admin Panel
 
@@ -185,6 +197,13 @@ Required variables (see `.env.example`):
 
 ### Legal Pages
 Static pages at `/agb`, `/datenschutz`, `/impressum` for terms, privacy, and imprint.
+
+### Language System
+Text rendering supports both informal ("du") and formal ("Sie") address modes:
+- Controlled by `config.whiteLabel.formalAddress`
+- Implementation: [lib/texts.ts](lib/texts.ts) - `getText(config, 'key')` function
+- Contest-aware variants: Changes text based on whether `contestPrize` is set
+- Usage in pages: `getText(appConfig, 'intro.headline')` returns appropriate variant
 
 ## Migration Guide
 

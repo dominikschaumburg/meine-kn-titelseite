@@ -1,6 +1,29 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Line } from 'react-chartjs-2'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js'
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+)
 
 interface AnalyticsEvent {
   type: string
@@ -22,6 +45,7 @@ export default function AdminDashboard() {
   const [analytics, setAnalytics] = useState<Analytics | null>(null)
   const [loading, setLoading] = useState(true)
   const [resetting, setResetting] = useState(false)
+  const [tooltipVisible, setTooltipVisible] = useState<string | null>(null)
 
   useEffect(() => {
     fetchAnalytics()
@@ -83,16 +107,29 @@ export default function AdminDashboard() {
     )
 
     // Group by hour
-    const hourlyMap: Record<string, number> = {}
+    const hourlyMap: Record<string, { timestamp: Date, count: number }> = {}
     pageViewEvents.forEach(event => {
       const date = new Date(event.timestamp)
       const hourKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:00`
-      hourlyMap[hourKey] = (hourlyMap[hourKey] || 0) + 1
+      if (!hourlyMap[hourKey]) {
+        hourlyMap[hourKey] = { timestamp: date, count: 0 }
+      }
+      hourlyMap[hourKey].count++
     })
 
     return Object.entries(hourlyMap)
-      .map(([hour, count]) => ({ hour, count }))
-      .sort((a, b) => a.hour.localeCompare(b.hour))
+      .map(([hour, data]) => ({
+        hour: data.timestamp.toLocaleString('de-DE', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        count: data.count,
+        sortKey: hour
+      }))
+      .sort((a, b) => a.sortKey.localeCompare(b.sortKey))
   }
 
   const getDailyData = () => {
@@ -179,20 +216,63 @@ export default function AdminDashboard() {
       {/* Daily Chart */}
       <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 mb-8">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Seitenaufrufe (Letzte 7 Tage)</h2>
-        <div className="flex items-end gap-2 h-48">
-          {dailyData.map((day, i) => (
-            <div key={i} className="flex-1 flex flex-col items-center">
-              <div className="flex-1 flex items-end w-full">
-                <div
-                  className="w-full bg-blue-500 rounded-t transition-all hover:bg-blue-600"
-                  style={{ height: `${(day.count / maxDaily) * 100}%` }}
-                  title={`${day.day}: ${day.count} Aufrufe`}
-                />
-              </div>
-              <div className="mt-2 text-xs text-gray-600 text-center">{day.day}</div>
-              <div className="text-xs font-semibold text-gray-900">{day.count}</div>
-            </div>
-          ))}
+        <div className="h-64">
+          <Line
+            data={{
+              labels: dailyData.map(d => d.day),
+              datasets: [
+                {
+                  label: 'Seitenaufrufe',
+                  data: dailyData.map(d => d.count),
+                  borderColor: 'rgb(59, 130, 246)',
+                  backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                  tension: 0.3,
+                  fill: true,
+                  pointRadius: 4,
+                  pointBackgroundColor: 'rgb(59, 130, 246)',
+                  pointBorderColor: '#fff',
+                  pointBorderWidth: 2,
+                  pointHoverRadius: 6,
+                }
+              ]
+            }}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false
+                },
+                tooltip: {
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  padding: 12,
+                  titleColor: '#fff',
+                  bodyColor: '#fff',
+                  displayColors: false,
+                  callbacks: {
+                    label: (context) => `${context.parsed.y} Aufrufe`
+                  }
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    stepSize: 1,
+                    precision: 0
+                  },
+                  grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                  }
+                },
+                x: {
+                  grid: {
+                    display: false
+                  }
+                }
+              }
+            }}
+          />
         </div>
       </div>
 
@@ -228,14 +308,25 @@ export default function AdminDashboard() {
             <div className="flex items-center gap-2 mb-2">
               <p className="text-sm text-gray-600">{metric.label}</p>
               {metric.tooltip && (
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center w-4 h-4 text-xs text-gray-500 border border-gray-300 rounded-full cursor-help hover:bg-gray-100"
-                  title={metric.tooltip}
-                  aria-label={metric.tooltip}
-                >
-                  ?
-                </button>
+                <div className="relative">
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center w-4 h-4 text-xs text-gray-500 border border-gray-300 rounded-full cursor-help hover:bg-gray-100 transition-colors"
+                    onMouseEnter={() => setTooltipVisible(metric.label)}
+                    onMouseLeave={() => setTooltipVisible(null)}
+                    onFocus={() => setTooltipVisible(metric.label)}
+                    onBlur={() => setTooltipVisible(null)}
+                    aria-label={metric.tooltip}
+                  >
+                    ?
+                  </button>
+                  {tooltipVisible === metric.label && (
+                    <div className="absolute left-0 top-full mt-1 z-10 w-48 p-2 text-xs text-white bg-gray-900 rounded shadow-lg pointer-events-none">
+                      {metric.tooltip}
+                      <div className="absolute bottom-full left-2 w-2 h-2 bg-gray-900 transform rotate-45 -mb-1"></div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
             <p className="text-3xl font-semibold text-gray-900">{metric.value}</p>
