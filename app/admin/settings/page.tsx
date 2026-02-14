@@ -4,6 +4,28 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/admin/AuthProvider'
 import { WhiteLabelConfig } from '@/lib/config'
 
+// Convert ISO string to datetime-local format (YYYY-MM-DDTHH:mm)
+// Preserves the time as displayed in the ISO string, ignoring timezone
+function toDatetimeLocal(isoString: string): string {
+  // Parse ISO string and create date in local timezone
+  const date = new Date(isoString)
+  // Format as YYYY-MM-DDTHH:mm in local timezone
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${year}-${month}-${day}T${hours}:${minutes}`
+}
+
+// Convert datetime-local format to ISO string
+// Treats input as local time and converts to ISO
+function fromDatetimeLocal(datetimeLocal: string): string {
+  // Create date from datetime-local string (interpreted as local time)
+  const date = new Date(datetimeLocal)
+  return date.toISOString()
+}
+
 export default function SettingsPage() {
   const { password } = useAuth()
   const [config, setConfig] = useState<WhiteLabelConfig | null>(null)
@@ -36,17 +58,26 @@ export default function SettingsPage() {
     setMessage(null)
 
     try {
+      // Ensure dates are properly formatted as ISO strings
+      const configToSave = {
+        ...config,
+        actionStart: config.actionStart,
+        actionEnd: config.actionEnd
+      }
+
       const response = await fetch('/api/config', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${password}`
         },
-        body: JSON.stringify({ whiteLabel: config })
+        body: JSON.stringify({ whiteLabel: configToSave })
       })
 
       if (response.ok) {
         setMessage({ type: 'success', text: 'Einstellungen erfolgreich gespeichert' })
+        // Reload config to verify saved values
+        await fetchConfig()
       } else {
         const error = await response.json()
         setMessage({ type: 'error', text: error.error || 'Fehler beim Speichern' })
@@ -120,10 +151,13 @@ export default function SettingsPage() {
               <input
                 type="datetime-local"
                 id="actionStart"
-                value={config.actionStart.slice(0, 16)}
-                onChange={(e) => setConfig({ ...config, actionStart: new Date(e.target.value).toISOString() })}
+                value={toDatetimeLocal(config.actionStart)}
+                onChange={(e) => setConfig({ ...config, actionStart: fromDatetimeLocal(e.target.value) })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Gespeichert: {new Date(config.actionStart).toLocaleString('de-DE')}
+              </p>
             </div>
             <div>
               <label htmlFor="actionEnd" className="block text-sm font-medium text-gray-700 mb-2">
@@ -132,10 +166,13 @@ export default function SettingsPage() {
               <input
                 type="datetime-local"
                 id="actionEnd"
-                value={config.actionEnd.slice(0, 16)}
-                onChange={(e) => setConfig({ ...config, actionEnd: new Date(e.target.value).toISOString() })}
+                value={toDatetimeLocal(config.actionEnd)}
+                onChange={(e) => setConfig({ ...config, actionEnd: fromDatetimeLocal(e.target.value) })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Gespeichert: {new Date(config.actionEnd).toLocaleString('de-DE')}
+              </p>
             </div>
           </div>
 
