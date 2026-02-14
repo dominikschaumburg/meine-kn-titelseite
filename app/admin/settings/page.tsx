@@ -5,25 +5,19 @@ import { useAuth } from '@/components/admin/AuthProvider'
 import { WhiteLabelConfig } from '@/lib/config'
 
 // Convert ISO string to datetime-local format (YYYY-MM-DDTHH:mm)
-// Preserves the time as displayed in the ISO string, ignoring timezone
+// Extracts date/time components directly from ISO string without timezone conversion
 function toDatetimeLocal(isoString: string): string {
-  // Parse ISO string and create date in local timezone
-  const date = new Date(isoString)
-  // Format as YYYY-MM-DDTHH:mm in local timezone
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  return `${year}-${month}-${day}T${hours}:${minutes}`
+  // Simply extract the date and time part from ISO string (before the 'Z' or timezone offset)
+  // ISO format: 2026-02-28T23:59:00.000Z -> Extract: 2026-02-28T23:59
+  return isoString.slice(0, 16)
 }
 
 // Convert datetime-local format to ISO string
-// Treats input as local time and converts to ISO
+// Appends 'Z' to treat as UTC (no timezone conversion)
 function fromDatetimeLocal(datetimeLocal: string): string {
-  // Create date from datetime-local string (interpreted as local time)
-  const date = new Date(datetimeLocal)
-  return date.toISOString()
+  // datetime-local format: 2026-02-28T23:59
+  // Add seconds, milliseconds, and 'Z' for UTC: 2026-02-28T23:59:00.000Z
+  return `${datetimeLocal}:00.000Z`
 }
 
 export default function SettingsPage() {
