@@ -36,3 +36,7 @@ next-env.d.ts
 
 # storage (generated images)
 /storage/generated-images/analytics.json
+
+# config files (managed via admin UI, not in git)
+config.json
+analytics.json

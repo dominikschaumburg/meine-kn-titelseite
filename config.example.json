@@ -2,17 +2,17 @@
   "version": "1.0",
   "whiteLabel": {
     "contestPrize": "",
-    "doiUrl": "https://aktion.kn-online.de/angebot/o7bl6",
-    "actionStart": "2026-01-13T00:00:00.000Z",
-    "actionEnd": "2026-01-30T16:00:00.000Z",
+    "doiUrl": "https://example.com/doi",
+    "actionStart": "2026-01-01T00:00:00.000Z",
+    "actionEnd": "2026-12-31T23:59:59.999Z",
     "moderationEnabled": false,
-    "formalAddress": true,
+    "formalAddress": false,
     "metaTitle": "Meine KN-Titelseite - Bring dein Selfie auf die Titelseite",
     "metaDescription": "Erstelle deine personalisierte Kieler Nachrichten Titelseite! Lade ein Selfie hoch und werde Teil der KN.",
     "socialShareImage": "/assets/share-image.jpg"
   },
   "security": {
     "doiSecret": "REPLACE_WITH_RANDOM_SECRET_ON_FIRST_RUN",
-    "adminPassword": "kn2025analytics"
+    "adminPassword": "env:ANALYTICS_PASSWORD"
   }
 }

@@ -40,7 +40,13 @@ A professional web application for creating personalized cover pages with user s
    ```
    Add your OpenAI API key to `.env.local`
 
-4. Run the development server:
+4. Create config file (first time only):
+   ```bash
+   cp config.example.json config.json
+   ```
+   The app will auto-generate a secure DOI secret on first run.
+
+5. Run the development server:
    ```bash
    npm run dev
    ```
@@ -53,10 +59,13 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 1. Connect your GitHub repository to Railway
 2. Set environment variables:
-   - `OPENAI_API_KEY`: Your OpenAI API key
+   - `LITELLM_API_KEY`: LiteLLM API key for content moderation
+   - `ANALYTICS_PASSWORD`: Admin panel password
    - `NEXT_PUBLIC_APP_URL`: https://meine-kn-titelseite.de
 
 3. Deploy automatically via Git pushes
+
+**Important:** The `config.json` file is NOT in the repository. You must configure it via the Admin UI at `/admin/settings` after first deployment. Settings are persisted on the server and survive deployments.
 
 ### Domain Configuration
 
